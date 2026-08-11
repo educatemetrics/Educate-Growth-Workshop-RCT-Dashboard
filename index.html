@@ -1697,9 +1697,9 @@ function renderAwareness(){
         riskCard('High risk — significant barriers', risk.high, 'HIGH', 'var(--coral)') +
         `<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">INCOMPLETE</span><div class="label">Screening incomplete</div><div class="value">${fmt(risk.incomplete)}</div><div class="sub">${pctTxt(risk.incomplete, risk.total_eligible)} of eligible — not all 5 questions answered yet</div></div>`;
       document.getElementById('awareCommitmentRiskTable').innerHTML = `<tr><th>Category</th><th>Definition</th><th># Eligible youth</th><th>% of eligible</th></tr>
-        <tr><td><b style="color:var(--green)">Low</b></td><td>Every one of the 5 criteria scored 2 — strong business continuity, confirmed cover, household support, and childcare all in place.</td><td>${fmt(risk.low)}</td><td>${pctTxt(risk.low,risk.total_eligible)}</td></tr>
-        <tr><td><b style="color:#A87A1E">Moderate</b></td><td>No criterion scored 0, but at least one scored 1 — has a plan, but a detail (e.g. household still needs convincing, business cover unconfirmed) needs follow-up before the workshop date.</td><td>${fmt(risk.moderate)}</td><td>${pctTxt(risk.moderate,risk.total_eligible)}</td></tr>
-        <tr><td><b style="color:var(--coral)">High</b></td><td>At least one criterion scored 0 — a concrete logistical, business-dependency, or permission obstacle was named. Flagged for intervention; resolving the barrier is needed to guarantee attendance.</td><td>${fmt(risk.high)}</td><td>${pctTxt(risk.high,risk.total_eligible)}</td></tr>
+        <tr><td><b style="color:var(--green)">Low</b></td><td>Total commitment score 8–10 out of 10 (sum of all 5 criteria, each scored 0–2) — strong business continuity, confirmed cover, household support, and childcare in place.</td><td>${fmt(risk.low)}</td><td>${pctTxt(risk.low,risk.total_eligible)}</td></tr>
+        <tr><td><b style="color:#A87A1E">Moderate</b></td><td>Total commitment score 5–7 out of 10 — has plans but some details are unconfirmed (e.g. household still needs convincing, business cover unconfirmed); needs follow-up before the workshop date.</td><td>${fmt(risk.moderate)}</td><td>${pctTxt(risk.moderate,risk.total_eligible)}</td></tr>
+        <tr><td><b style="color:var(--coral)">High</b></td><td>Total commitment score below 5 out of 10 — major logistical, business-dependency, or permission obstacles. Flagged for intervention; resolving the barrier(s) is needed to guarantee attendance.</td><td>${fmt(risk.high)}</td><td>${pctTxt(risk.high,risk.total_eligible)}</td></tr>
         <tr><td><b style="color:var(--muted)">Screening incomplete</b></td><td>Hasn't yet answered all 5 Commitment Screening questions — not categorised rather than guessed at.</td><td>${fmt(risk.incomplete)}</td><td>${pctTxt(risk.incomplete,risk.total_eligible)}</td></tr>`;
     } else {
       document.getElementById('awareCommitmentRiskKpi').innerHTML = ['Low risk','Moderate risk','High risk','Screening incomplete']
@@ -2866,7 +2866,7 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
    tripped, or a sheet was renamed/moved), NONE of the live sections are
    applied — the dashboard keeps the embedded snapshot everywhere and the
    badge shows the error, rather than partially overwriting good data. */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweaxg_fe1JD9E7kwKxDshDzDz5qOP2uYeUqZz0zYfNhOmKrGXasO0nMlsseC7zIC12/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaVyiLlF32ujSe0A4n2KpAT_2kj7AV7sc5FJ50z6EJ7licDXqMlOsmeSHtD81PCa5O/exec';
 let LIVE_DATA_STATUS = 'offline'; // 'offline' | 'live' | 'error'
 let LIVE_DATA_TIMESTAMP = null;
 let LIVE_DATA_ERROR = null;

@@ -601,13 +601,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <table id="execGenderTable"></table>
   </div>
 
-  <div class="exec-band"><span class="num">9</span><h3>Mindset shift — baseline vs endline</h3><div class="rule"></div></div>
-  <div class="panel">
-    <div class="panel-head"><div><h3>Same cohort, before and after</h3><p>Average self-rating (1–5) across all 8 mindset metrics, baseline vs endline.</p></div><span class="chip real">REAL — Baseline &amp; Endline data</span></div>
-    <canvas id="execMindsetChart" style="max-height:280px;"></canvas>
-  </div>
-
-  <div class="exec-band"><span class="num">10</span><h3>Marketing vs. baseline overview</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">9</span><h3>Marketing vs. baseline overview</h3><div class="rule"></div></div>
   <div class="note">"Marketing" = Awareness-stage recruitment (registered, eligible). "Baseline" = confirmed baseline surveys. Added in response to the Aug 2026 dashboard comments, asking for these side by side.</div>
   <div class="grid" id="esMarketingBaselineKpi"></div>
   <div class="panel">
@@ -660,14 +654,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <canvas id="awareDailyChart"></canvas>
   </div>
 
-  <div class="exec-band"><span class="num">5</span><h3>Anticipated barriers to participation</h3><div class="rule"></div></div>
-  <div class="note" id="awareBarriersNote" style="margin-bottom:14px;"></div>
-  <div class="panel">
-    <div class="panel-head"><div><h3>Thematic breakdown — what youth flagged, at registration</h3><p>Multi-select — a registrant can flag more than one barrier, so these don't sum to the total. Click a bar to see how that barrier splits by district and gender.</p></div><span class="chip sim">JUNE PILOT ONLY</span></div>
-    <canvas id="awareBarriersChart"></canvas>
-  </div>
-
-  <div class="exec-band"><span class="num">6</span><h3>Commitment screening</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">5</span><h3>Commitment screening</h3><div class="rule"></div></div>
   <div class="note">A new, more detailed screening layer defined for the RCT survey — five probe questions that turn each anticipated barrier above into a scored (0&ndash;2) commitment signal, so screeners can prioritise rather than reject borderline youth. <b>These are new fields in the RCT Awareness/KYC form and have no submissions yet</b> (the RCT only launched Aug 9&ndash;10, 2026, and hasn't reached volume) — the June pilot data behind the rest of this dashboard never asked these questions. This panel documents the rubric so it's ready to populate as real RCT responses come in; nothing below is computed from data.</div>
   <div class="panel">
     <div class="panel-head"><div><h3>Scoring rubric, by criterion</h3><p>Source: E! Growth Data Points by Funnel Stage (Stage 1 &mdash; Awareness / KYC Intake).</p></div><span class="chip sim">NO DATA YET</span></div>
@@ -681,13 +668,13 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     </table></div>
   </div>
 
-  <div class="exec-band"><span class="num">7</span><h3>Drivers for registration</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">6</span><h3>Drivers for registration</h3><div class="rule"></div></div>
   <div class="panel">
     <div class="panel-head"><div><h3>Primary reasons for registering</h3><p>Multi-select — youth could pick more than one.</p></div><span class="chip real">REAL</span></div>
     <canvas id="awareDriversChart"></canvas>
   </div>
 
-  <div class="exec-band"><span class="num">8</span><h3>Location &amp; demographic breakdown</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">7</span><h3>Location &amp; demographic breakdown</h3><div class="rule"></div></div>
   <div class="grid g2">
     <div class="panel">
       <div class="panel-head"><div><h3>Location comparison, vs target</h3><p>All 7 locations from the master target plan. Click a row (where clickable) to drill to parish level.</p></div><span class="chip real">REAL vs TARGET</span></div>
@@ -699,13 +686,13 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     </div>
   </div>
 
-  <div class="exec-band"><span class="num">9</span><h3>Parish detail</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">8</span><h3>Parish detail</h3><div class="rule"></div></div>
   <div class="panel">
     <div class="panel-head"><div><h3>Registered &amp; eligible, by district</h3><p>Click a district to drill into its parish-level detail.</p></div><span class="chip real">REAL</span></div>
     <table id="awareParishTable"></table>
   </div>
 
-  <div class="exec-band"><span class="num">10</span><h3>Eligible &rarr; Baselined</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">9</span><h3>Eligible &rarr; Baselined</h3><div class="rule"></div></div>
   <div class="note" style="margin-bottom:14px;">Every eligible Awareness registrant (<span id="awareBaselineEligTotal"></span>) cross-referenced against completed Baseline surveys, matched by youth ID. This figure matches the Awareness-only eligible count above.</div>
   <div class="grid" id="awareBaselineKpi"></div>
   <div class="grid g2">
@@ -732,7 +719,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     </div>
   </div>
 
-  <div class="exec-band"><span class="num">11</span><h3>Marketing vs. baseline — absolute numbers &amp; eligibility</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">10</span><h3>Marketing vs. baseline — absolute numbers &amp; eligibility</h3><div class="rule"></div></div>
   <div class="note" style="margin-bottom:14px;">All Awareness registrants ("marketing") against eligibility and completed baselines — not just the eligible subset baselined above. This helps assess overall baseline coverage, not only among the already-eligible pool. Same underlying figures as the Executive Summary and Enumerator Worklist.</div>
   <div class="grid" id="awareMarketingBaselineKpi"></div>
   <div class="grid g2">
@@ -746,7 +733,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     </div>
   </div>
 
-  <div class="exec-band"><span class="num">12</span><h3>Data quality — likely-duplicate registrations</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">11</span><h3>Data quality — likely-duplicate registrations</h3><div class="rule"></div></div>
   <div class="note" id="awareDupNote" style="margin-bottom:14px;"></div>
   <div class="grid" id="awareDupKpi"></div>
   <table id="awareDupTable"></table>
@@ -1067,33 +1054,11 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <div class="pivot-scroll"><table id="enumTable" class="pivot-table"></table></div>
   </div>
 
-  <div class="exec-band"><span class="num">3</span><h3>Baseline coverage &amp; income analytics</h3><div class="rule"></div></div>
-  <div class="note" style="margin-bottom:14px;">These figures look at the full recruitment pipeline, not just this filtered worklist — programme-wide, not affected by the district filter above.</div>
-  <div class="grid" id="enumAnalyticsKpi"></div>
-  <div class="grid g2">
-    <div class="panel">
-      <div class="panel-head"><div><h3>Recruitment vs. baseline coverage, by district</h3><p>All Awareness registrants — not just the eligible subset in this worklist — against how many have completed a baseline survey. Click a row for parish detail.</p></div><span class="chip real">REAL</span></div>
-      <table id="enumRecruitVsBaselineTable"></table>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div><h3>Baseline entries per enumerator</h3><p>Total baseline surveys completed, by enumerator, to date.</p></div><span class="chip real">REAL</span></div>
-      <table id="enumByEnumeratorTable"></table>
-    </div>
-  </div>
-
-  <div class="exec-band"><span class="num">4</span><h3>Baseline income vs. net profit</h3><div class="rule"></div></div>
-  <div class="note" id="enumProfitNote" style="margin-bottom:14px;"></div>
-  <div class="grid" id="enumProfitKpi"></div>
-  <div class="grid g2">
-    <div class="panel">
-      <div class="panel-head"><div><h3>Weekly income vs. weekly-equivalent net profit, by district</h3></div><span class="chip real">REAL</span></div>
-      <canvas id="enumProfitChart" style="max-height:320px;"></canvas>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div><h3>Detail, by district</h3></div><span class="chip real">REAL</span></div>
-      <table id="enumProfitTable"></table>
-    </div>
-  </div>
+  <!-- Sections 3 (Baseline coverage & income analytics) and 4 (Baseline income vs. net profit) removed
+       2026-08-11: duplicated the Recruitment tab's "Marketing vs. baseline" and income/net-profit panels
+       (Awareness tab, bands 10-11) rather than showing anything enumerator-specific, and were never wired
+       live (BASELINE_ANALYTICS / NET_PROFIT_ANALYSIS have no live source). Baseline coverage for the
+       filtered worklist stays live in section 1 (Progress) above. -->
 </div>
 
 <div class="view" id="view-guide">
@@ -1212,7 +1177,7 @@ function currentDistrict(){ return FILTER_DISTRICT; }
 /* ================= AWARENESS HELPERS ================= */
 function awareStats(district){
   const A = DATA.awareness;
-  if(!district) return { registered:A.registered, interested:A.interested, consented:A.consented, eligible:A.eligible, femPct: pct(A.by_gender_eligible.female, A.by_gender_eligible.female+A.by_gender_eligible.male) };
+  if(!district) return { registered:A.registered, interested:A.interested, consented:A.consented, eligible:A.eligible_demographic, femPct: pct(A.by_gender_eligible.female, A.by_gender_eligible.female+A.by_gender_eligible.male) };
   const d = A.by_district[district];
   if(!d) return { registered:0, interested:0, consented:0, eligible:0, femPct:0 };
   // interested/consented aren't stored per-district, so approximate proportionally from district's registered share for display purposes; eligible (behavioural) IS stored per district.
@@ -1277,19 +1242,9 @@ function awareDrillKycCriterion(label, failing, total){
     <p class="drill-note">${fmt(failing)} of ${fmt(total)} registrants (${pctTxt(failing,total)}) fail this criterion, under the priority (education-adjusted) rule used for this table (Education S1&ndash;S5 only, P7 excluded; income unchanged at &ge; UGX 35,000/week).</p>`;
 }
 
-function awareDrillBarrierTheme(key){
-  const theme = BARRIERS_THEMATIC.themes.find(t=>t.key===key);
-  if(!theme) return;
-  esOpen(theme.label, 'BARRIER COHORT');
-  const distRows = Object.entries(theme.by_district).sort((a,b)=>b[1]-a[1])
-    .map(([d,n])=>`<div class="drill-row"><span>${titleCase(d)}</span><span><b>${fmt(n)}</b> (${pctTxt(n, theme.count)} of this theme)</span></div>`).join('');
-  const genderRows = Object.entries(theme.by_gender).sort((a,b)=>b[1]-a[1])
-    .map(([g,n])=>`<div class="drill-row"><span>${titleCase(g)}</span><span><b>${fmt(n)}</b> (${pctTxt(n, theme.count)} of this theme)</span></div>`).join('');
-  document.getElementById('drillBody').innerHTML = `
-    <div class="dpanel"><h4>Who's affected — by district</h4>${distRows || '<p class="drill-note">No district data.</p>'}</div>
-    <div class="dpanel"><h4>Who's affected — by gender</h4>${genderRows || '<p class="drill-note">No gender data.</p>'}</div>
-    <p class="drill-note">${fmt(theme.count)} of ${fmt(BARRIERS_THEMATIC.total)} registrants (${pctTxt(theme.count, BARRIERS_THEMATIC.total)}) flagged this barrier. Individual names aren't shown here — this question isn't linked to a youth ID on the source tracker, so only aggregate district/gender counts can be shown reliably.</p>`;
-}
+// awareDrillBarrierTheme() removed 2026-08-11 — was only reachable from the "Anticipated barriers to
+// participation" chart's onClick, which has been removed. BARRIERS_THEMATIC itself is left in the
+// embedded data below (harmless, unused) rather than risk breaking the JSON literal around it.
 
 /* ---- Mobilisation: district -> venue ---- */
 function mobDrillDistricts(){
@@ -1523,19 +1478,12 @@ function renderExec(){
       return `<tr class="kpi-clickable" onclick="simpleDrill('${label}','GENDER','<div class=\\'drill-row\\'><span>Female</span><span><b>${f}</b></span></div><div class=\\'drill-row\\'><span>Male</span><span><b>${m}</b></span></div>')"><td><b>${label}</b> ›</td><td>${fmt(f)}</td><td>${fmt(m)}</td><td style="color:${col};font-weight:700">${p.toFixed(1)}%</td><td>${(100-p).toFixed(1)}%</td><td>60% F / 40% M</td></tr>`;
     }).join('');
 
-  // ---- 8: mindset chart ----
-  mk('execMindsetChart', {
-    type:'bar',
-    data:{ labels: DATA.mindset_shift.map(m=>m.metric), datasets:[
-      { label:'Baseline', data: DATA.mindset_shift.map(m=>m.baseline), backgroundColor:'#C9C0A6' },
-      { label:'Endline', data: DATA.mindset_shift.map(m=>m.endline), backgroundColor: teal },
-    ]},
-    options:{ plugins:{ legend:{display:true} }, scales:{ y:{ beginAtZero:true, max:5 } } }
-  });
+  // Mindset shift (formerly section 9, "baseline vs endline") removed from Executive Summary
+  // 2026-08-11 per request — the same chart still exists on the Endline tab (renderEndline(),
+  // endlineMindsetChart), which wasn't touched.
 
-  // ---- 10: marketing (recruitment) vs. baseline overview ----
-  // MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot snapshot, no live source. See the same
-  // note on renderEnumBaselineAnalytics().
+  // ---- 9: marketing (recruitment) vs. baseline overview ----
+  // MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot snapshot, no live source.
   document.getElementById('esMarketingBaselineKpi').innerHTML = [
     'Recruited (marketing)', 'Eligible', 'Baselined',
   ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
@@ -1634,14 +1582,8 @@ function renderAwareness(){
       <tr><td colspan="4" style="color:var(--muted);text-align:center;padding:14px;">Awaiting live data — redeploy the updated Code.gs to enable.</td></tr>`;
   }
 
-  document.getElementById('awareBarriersNote').innerHTML = `<b>June pilot data only — this question isn't in the RCT Awareness form (v12).</b> The open-ended "what might stop you from attending?" question below was asked of every registrant during the June pilot and hand-coded into these themes; the RCT form replaced it with the five structured Commitment Screening questions in Band 6 (Business Continuity, Attendance Plan, Business Cover, Household Permission, Dependents &amp; Childcare). <b>${fmt(BARRIERS_THEMATIC.reported_any)}</b> of ${fmt(BARRIERS_THEMATIC.total)} June pilot registrants (${pctTxt(BARRIERS_THEMATIC.reported_any, BARRIERS_THEMATIC.total)}) flagged at least one anticipated barrier.`;
-  const barrierLabels2 = BARRIERS_THEMATIC.themes.map(t=>t.label);
-  mk('awareBarriersChart', {
-    type:'bar',
-    data:{ labels: barrierLabels2, datasets:[{ label:'Registrants flagging this barrier', data: BARRIERS_THEMATIC.themes.map(t=>t.count), backgroundColor: coral }] },
-    options:{ indexAxis:'y', plugins:{legend:{display:false}, datalabels:{anchor:'end',align:'right',offset:4}}, onHover:chartHover,
-      onClick:(e,els)=>{ if(!els.length) return; awareDrillBarrierTheme(BARRIERS_THEMATIC.themes[els[0].index].key); } }
-  });
+  // "Anticipated barriers to participation" chart (awareBarriersNote/awareBarriersChart) removed
+  // 2026-08-11 per request — it was June-pilot-only data (a question that isn't in the RCT form).
 
   mk('awareDailyChart', {
     type:'bar',
@@ -1724,8 +1666,7 @@ function renderBaselineTracking(){
   renderProfitAnalysis('aware');
 
   // ---- marketing vs. baseline, absolute numbers + eligibility ----
-  // MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot snapshot, no live source. See the same
-  // note on renderEnumBaselineAnalytics().
+  // MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot snapshot, no live source.
   document.getElementById('awareMarketingBaselineKpi').innerHTML = [
     'Recruited (marketing)', 'Eligible', 'Baselined',
   ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
@@ -2075,15 +2016,26 @@ function mtDrillMobiliserParish(name){
     <div class="dpanel"><h4>Parishes visited</h4>${parishRows || '<p class="drill-note">No parish data for this filter.</p>'}</div>
     <p class="drill-note">The mobiliser tracker logs which parishes were visited each day, but not a per-mobiliser split of registrations within each parish — so the figures above are parish-wide totals (from the Awareness tab), not specifically this mobiliser's count in that parish. Visit-days show how often this mobiliser worked there.</p>`;
 }
-// MUTED (2026-08-11): the mobiliser-select dropdown and everything below except the Location Target
-// Table are built from MOB_DAILY, a June-pilot snapshot of day-by-day mobiliser call/registration logs
-// with no live source — that data lives on a Mobilisation-domain sheet Code.gs doesn't read yet. Per
-// the no-demo-data policy, muted rather than shown as real. Location Target Table stays live (it's
-// sourced from DIVISION_TARGETS, which Code.gs does compute live).
+// MUTED (2026-08-11): the mobiliser-select dropdown, the "Overall target progress" bar (section 1),
+// and the Cumulative/Daily mobiliser tables (sections 4-5) are built from MOB_DAILY, a June-pilot
+// snapshot of day-by-day mobiliser call/registration logs with no live source — that data lives on a
+// Mobilisation-domain sheet Code.gs doesn't read yet. Per the no-demo-data policy, muted rather than
+// shown as real. The Location Target Table (section 3) stays live (sourced from DIVISION_TARGETS,
+// which Code.gs does compute live), and the Awareness scorecards (section 2, mtKpi) were re-wired
+// live below — they only need the same Awareness-tab totals used elsewhere, not MOB_DAILY.
 function renderMobTrack(){
+  // Awareness scorecards (2026-08-11): this doesn't need the per-mobiliser daily logs (MOB_DAILY) at
+  // all — it's the same registered/eligible totals already live on the Awareness tab, scoped to the
+  // district filter via the existing awareStats() helper. Previously blanked by mistake along with the
+  // genuinely MOB_DAILY-dependent sections below; wired live here instead.
+  const mtA = awareStats(FILTER_DISTRICT);
+  const mtEligFemale = Math.round((mtA.eligible||0) * (mtA.femPct||0) / 100);
+  const mtMobNote = FILTER_MOBILISER ? 'District totals — Awareness data isn\'t tracked per-mobiliser, so this doesn\'t narrow further by mobiliser.' : (FILTER_DISTRICT ? 'For the selected district' : 'All districts');
   document.getElementById('mtKpi').innerHTML = [
-    'Registered', 'Eligible', 'Eligible Female',
-  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div><div class="sub">Daily mobiliser logs aren't wired to live data yet</div></div>`).join('');
+    { label:'Registered', value: fmt(mtA.registered), sub: mtMobNote },
+    { label:'Eligible', value: fmt(mtA.eligible), sub: mtA.registered ? pctTxt(mtA.eligible, mtA.registered)+' of registered' : mtMobNote },
+    { label:'Eligible Female', value: fmt(mtEligFemale), sub: mtA.eligible ? pctTxt(mtEligFemale, mtA.eligible)+' of eligible' : mtMobNote },
+  ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
 
   // ---- location target table (master plan, from Marit's targets PDF) ----
   document.getElementById('mtLocationTargetTable').innerHTML = `<tr><th>Location</th><th>Status</th><th>Eligible-interested<br>Target</th><th>Actual</th><th>% of Target</th><th>Baseline Target</th><th>Baselined (Actual)</th><th>% of Target</th><th>Assigned mobilisers (plan)</th></tr>` +
@@ -2397,31 +2349,15 @@ function renderEnumerator(){
       return `<tr class="kpi-clickable" onclick="enumDrillYouth('${y.youth_id}')"><td><b>${y.youth_id}</b> ›</td><td>${y.name||'—'}</td><td>${y.gender?titleCase(y.gender):'—'}</td><td>${titleCase(y.district)}</td><td>${humanizeLoc(y.parish)}</td><td>${humanizeLoc(y.village)}</td><td>${y.baselined?'<span style="color:var(--green);font-weight:700">Baselined</span>':'<span style="color:var(--coral);font-weight:700">Not yet</span>'}</td></tr>`; }).join('')
     || `<tr><td colspan="7" style="text-align:center;color:var(--muted)">No youth match this filter.</td></tr>`);
 
-  renderEnumBaselineAnalytics();
+  // Sections 3/4 (baseline coverage & income analytics, income vs. net profit) removed 2026-08-11 —
+  // see the comment in the HTML above. That content lives on the Recruitment > Awareness tab instead.
 }
 
-// MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot Baseline snapshot (n=134/607) with no live
-// source — Code.gs's buildBaselineTracking() only links youth_id for the baselined/not_yet counts,
-// it doesn't compute income, recruitment-vs-baseline, or per-enumerator entry counts. Blank rather
+// Shared income-vs-net-profit renderer, reused on the Executive Summary and the Awareness tab's
+// baseline tracking band (no longer on Enumerator Worklist — see renderEnumerator()). MUTED
+// (2026-08-11): NET_PROFIT_ANALYSIS is a June-pilot Baseline snapshot (n=134) with no live source —
+// Code.gs doesn't compute this from the live Baseline tab. Per the no-demo-data policy, blank rather
 // than show pilot numbers under a "REAL" tag.
-function renderEnumBaselineAnalytics(){
-  document.getElementById('enumAnalyticsKpi').innerHTML = [
-    'Avg. income at baseline (2-week)', 'Avg. income, eligible-at-baseline', 'Recruited (all Awareness)', 'Baselined, of all recruited',
-  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
-
-  document.getElementById('enumRecruitVsBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th><th>% of Eligible</th></tr>
-    <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
-
-  document.getElementById('enumByEnumeratorTable').innerHTML = `<tr><th>Enumerator</th><th>Baseline entries</th></tr>
-    <tr><td colspan="2" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
-
-  renderProfitAnalysis('enum');
-}
-
-// Shared income-vs-net-profit renderer, reused on the Enumerator Worklist, Executive Summary, and the
-// Awareness tab's baseline tracking band. MUTED (2026-08-11): NET_PROFIT_ANALYSIS is a June-pilot
-// Baseline snapshot (n=134) with no live source — Code.gs doesn't compute this from the live Baseline
-// tab. Per the no-demo-data policy, blank rather than show pilot numbers under a "REAL" tag.
 function renderProfitAnalysis(prefix){
   const noteEl = document.getElementById(prefix+'ProfitNote');
   if(noteEl) noteEl.innerHTML = `<span style="color:var(--muted)">🔒 Not live yet — this panel used a June-pilot Baseline snapshot (n=134) with no live source. Muted rather than shown as real.</span>`;

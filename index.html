@@ -1063,8 +1063,8 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <p>Every eligible &amp; interested youth, by district and parish, for baseline scheduling and follow-up. Click a row to see full contact and location detail. District filter above applies here too.</p>
   </div>
 
-  <div class="note">Subcounty and "preferred interview time" aren't shown — both live in a separate phone-screening tracker with no shared ID to join reliably. Village and parish are shown instead; confirm timing directly with the youth.</div>
-  <div class="note">Sourced from the "Eligible youth" tracker: age and education only, both confirmed within the 18&ndash;30 / P7&ndash;S5 bands for all 360 people here. The other 5 criteria (interest, consent, business ownership, prior training, income) live on a separate tracker with no shared ID — see the Persona KYC tab for that aggregate picture.</div>
+  <div class="note">Table shows village and parish; subcounty is on the sheet but omitted here to keep columns focused — click a row for the fuller detail, including scheduling availability, business location, and GPS where recorded.</div>
+  <div class="note">Live from the Awareness sheet: every row with <i>is_eligible = "eligible"</i> and an assigned youth ID. All 7 criteria (interest, consent, age, education, business ownership, prior training, income) are checked on the same row — see the Persona KYC tab for the criterion-by-criterion breakdown.</div>
 
   <div class="globalfilters" style="position:static;margin-bottom:20px;border-radius:8px;">
     <span class="gf-label">Parish</span>
@@ -1073,7 +1073,13 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <select id="enumBaselineFilter">
       <option value="">All</option>
       <option value="yes">Baselined</option>
-      <option value="no">Not yet baselined</option>
+      <option value="no" selected>Not yet baselined</option>
+    </select>
+    <span class="gf-label">Priority</span>
+    <select id="enumPriorityFilter">
+      <option value="">All</option>
+      <option value="priority">Priority (S1–S5)</option>
+      <option value="backup">Backup (P7)</option>
     </select>
     <span class="gf-label">Search</span>
     <input id="enumSearch" type="text" placeholder="Name or youth ID…" style="padding:7px 10px;border-radius:6px;border:1px solid #D8D2C2;font-size:13px;min-width:180px;">
@@ -1257,6 +1263,19 @@ const CRITERION_RUBRIC = {
   household_permission: { barrier:'Household / spousal permission', question:'What would your parent, guardian, or spouse say about you being away for three days? (If married, ask about spouse.)', score2:'They are supportive', score1:"Need a lot of convincing / not sure, haven't asked", score0:"They can't allow me" },
   dependents_childcare: { barrier:'Childcare / dependents', question:"Do you have children or other dependents you look after every day? If yes, who would take care of them while you're away?", score2:'No dependents, or has a specific person', score1:'Someone helps sometimes', score0:'No one / not sure' },
 };
+
+// Canonical education-level order (2026-08-11, per request) — mirrors Code.gs's
+// EDUCATION_LEVEL_ORDER exactly, copied from education_level_list in the v12 XLSForm. Used as a
+// client-side sort so chart ordering is correct even before a Code.gs redeploy propagates the
+// matching backend fix (awareEduChart), and for acqEduChart, which draws on embedded snapshot data
+// with no Code.gs backend at all.
+const EDUCATION_LEVEL_ORDER = ['p5_below','p6','p7','s1','s2','s3','s4','s5','s6','diploma','graduate','certificate','other_edu'];
+function sortEducationKeys(keys){
+  return [...keys].sort((a,b)=>{
+    const ia = EDUCATION_LEVEL_ORDER.indexOf(a), ib = EDUCATION_LEVEL_ORDER.indexOf(b);
+    return (ia===-1?EDUCATION_LEVEL_ORDER.length:ia) - (ib===-1?EDUCATION_LEVEL_ORDER.length:ib);
+  });
+}
 
 /* ================= AWARENESS HELPERS ================= */
 function awareStats(district){
@@ -1820,7 +1839,8 @@ function renderAwareness(){
       return `<tr${rowAttrs}><td><b>${d.location}</b>${arrow}</td><td>${fmt(d.eligible_target)}</td><td>${fmt(registered)}</td><td>${fmt(eligible)}</td><td>${femalePct}</td></tr>`;
     }).join('');
 
-  mk('awareEduChart', { type:'bar', data:{ labels:Object.keys(A.education_level).map(k=>k.toUpperCase()), datasets:[{label:'Youth',data:Object.values(A.education_level), backgroundColor:gold}]}, options:{plugins:{legend:{display:false}}} });
+  { const eduKeys = sortEducationKeys(Object.keys(A.education_level));
+    mk('awareEduChart', { type:'bar', data:{ labels:eduKeys.map(k=>k.toUpperCase()), datasets:[{label:'Youth',data:eduKeys.map(k=>A.education_level[k]), backgroundColor:gold}]}, options:{plugins:{legend:{display:false}}} }); }
   mk('awareDriversChart', { type:'bar', data:{ labels:Object.keys(A.registration_drivers).map(k=>k.replace(/_/g,' ')), datasets:[{label:'Youth',data:Object.values(A.registration_drivers), backgroundColor:inkSoft}]}, options:{indexAxis:'y',plugins:{legend:{display:false}, datalabels:{anchor:'end',align:'right',offset:4}}} });
 
   const awareGenderRows = [
@@ -2073,7 +2093,8 @@ function renderAcquisition(){
   mk('acqDistChart', { type:'bar', data:{ labels:Object.keys(AR.by_district).map(titleCase), datasets:[{label:'Verified',data:Object.values(AR.by_district), backgroundColor:teal}]}, options:{plugins:{legend:{display:false}}, onHover:chartHover, onClick:()=>acqDrillDistricts()} });
   document.getElementById('acqDistTable').innerHTML = `<tr><th>District</th><th>Verified</th></tr>` +
     Object.entries(AR.by_district).map(([d,v])=>`<tr class="kpi-clickable" onclick="acqDrillVenue('${d}')"><td><b>${titleCase(d)}</b> ›</td><td>${fmt(v)}</td></tr>`).join('');
-  mk('acqEduChart', { type:'bar', data:{ labels:Object.keys(AR.education_level).map(k=>k.toUpperCase()), datasets:[{label:'Youth',data:Object.values(AR.education_level), backgroundColor:gold}]}, options:{plugins:{legend:{display:false}}} });
+  { const eduKeys = sortEducationKeys(Object.keys(AR.education_level));
+    mk('acqEduChart', { type:'bar', data:{ labels:eduKeys.map(k=>k.toUpperCase()), datasets:[{label:'Youth',data:eduKeys.map(k=>AR.education_level[k]), backgroundColor:gold}]}, options:{plugins:{legend:{display:false}}} }); }
 
   const venueRows = [];
   Object.entries(AR.by_venue||{}).forEach(([d,venues])=>{
@@ -2424,6 +2445,7 @@ function renderMobTrack(){
 document.getElementById('mtMobiliser').addEventListener('change', (e)=>{ FILTER_MOBILISER = e.target.value; renderMobTrack(); });
 document.getElementById('enumParish').addEventListener('change', (e)=>{ FILTER_PARISH = e.target.value; renderEnumerator(); });
 document.getElementById('enumBaselineFilter').addEventListener('change', (e)=>{ FILTER_BASELINE = e.target.value; renderEnumerator(); });
+document.getElementById('enumPriorityFilter').addEventListener('change', (e)=>{ FILTER_PRIORITY = e.target.value; renderEnumerator(); });
 document.getElementById('enumSearch').addEventListener('input', (e)=>{ FILTER_ENUM_SEARCH = e.target.value; renderEnumerator(); });
 
 
@@ -2667,7 +2689,13 @@ const DUPLICATES_ANALYSIS = {"note":"Based on matching phone numbers across Recr
 
 /* ================= ENUMERATOR WORKLIST ================= */
 let FILTER_PARISH = '';
-let FILTER_BASELINE = '';
+// Defaults to 'no' (Not yet baselined) as of 2026-08-11, per staff request — since there's more
+// than one person per district, an already-baselined youth left visible by default made it easy to
+// accidentally re-contact/re-schedule someone already done. Baseline status itself is always live
+// (recomputed from the Baseline sheet on every fetch/auto-refresh) — this just changes what shows
+// by default; switch the dropdown to "All" or "Baselined" to see everyone.
+let FILTER_BASELINE = 'no';
+let FILTER_PRIORITY = '';
 let FILTER_ENUM_SEARCH = '';
 
 function enumFilteredRows(){
@@ -2676,6 +2704,11 @@ function enumFilteredRows(){
     if(FILTER_PARISH && y.parish !== FILTER_PARISH) return false;
     if(FILTER_BASELINE === 'yes' && !y.baselined) return false;
     if(FILTER_BASELINE === 'no' && y.baselined) return false;
+    if(FILTER_PRIORITY){
+      const tier = eduPriorityTag(y.education).tier;
+      if(FILTER_PRIORITY === 'priority' && tier !== 1) return false;
+      if(FILTER_PRIORITY === 'backup' && tier !== 2) return false;
+    }
     if(FILTER_ENUM_SEARCH){
       const q = FILTER_ENUM_SEARCH.toLowerCase();
       if(!y.youth_id.toLowerCase().includes(q) && !y.name.toLowerCase().includes(q)) return false;
@@ -2765,14 +2798,17 @@ function enumDrillRecruitParish(district){
   document.getElementById('drillBody').innerHTML = `<div class="dpanel"><h4>Parish breakdown</h4>${rows || '<p class="drill-note">No parish data.</p>'}</div>`;
 }
 
+// Fixed 2026-08-11: previously read y.availability.available_to_speak/callback_slot/callback_notes,
+// none of which Code.gs ever populated (see the old comment removed from buildEnumeratorList()) — so
+// this always showed "Not currently collected" even once real data existed. Now reads the actual raw
+// Awareness-sheet fields (scheduling_availability, scheduling_date, baseline_visit_time_of_day),
+// confirmed present via a raw-sheet audit. Still sparse — populated for a minority of records so far.
 function enumAvailabilityText(y){
-  if(!y.availability) return 'Not currently collected';
-  const a = y.availability;
   const parts = [];
-  if(a.available_to_speak) parts.push('Available to speak: ' + titleCase(String(a.available_to_speak)));
-  if(a.callback_slot) parts.push('Slot: ' + String(a.callback_slot).replace(/_/g,' '));
-  if(a.callback_notes) parts.push('Note: ' + a.callback_notes);
-  return parts.length ? parts.join(' · ') : 'Not currently collected';
+  if(y.scheduling_availability) parts.push(titleCase(y.scheduling_availability.replace(/_/g,' ')));
+  if(y.scheduling_date) parts.push('Date: ' + y.scheduling_date);
+  if(y.baseline_visit_time_of_day) parts.push('Time of day: ' + titleCase(y.baseline_visit_time_of_day.replace(/_/g,' ')));
+  return parts.length ? parts.join(' · ') : 'Not yet recorded';
 }
 
 function enumDrillYouth(youthId){
@@ -2787,7 +2823,7 @@ function enumDrillYouth(youthId){
     <div class="dpanel"><h4>Identity</h4>
       <div class="drill-row"><span>Youth ID</span><span><b>${y.youth_id}</b></span></div>
       <div class="drill-row"><span>Registered name</span><span><b>${y.name||'—'}</b></span></div>
-      <div class="drill-row"><span>Name commonly used</span><span><b>Not captured in the source data</b></span></div>
+      <div class="drill-row"><span>Name commonly used</span><span><b>${y.familiar_name||'Not yet recorded'}</b></span></div>
       <div class="drill-row"><span>Identity verified at screening</span><span><b>Not reliably linked to this list</b></span></div>
       <div class="drill-row"><span>Gender</span><span><b>${y.gender?titleCase(y.gender):'—'}</b></span></div>
       <div class="drill-row"><span>Baseline priority</span><span><b>${eduPriorityTag(y.education).label}</b></span></div>
@@ -2796,12 +2832,14 @@ function enumDrillYouth(youthId){
       <div class="drill-row"><span>District</span><span><b>${titleCase(y.district)}</b></span></div>
       <div class="drill-row"><span>Parish</span><span><b>${humanizeLoc(y.parish)}</b></span></div>
       <div class="drill-row"><span>Village</span><span><b>${humanizeLoc(y.village)}</b></span></div>
+      <div class="drill-row"><span>Business location</span><span><b>${y.business_location||'Not yet recorded'}</b></span></div>
+      <div class="drill-row"><span>GPS</span><span><b>${y.gps?`<a href="https://maps.google.com/?q=${y.gps.lat},${y.gps.lng}" target="_blank" rel="noopener">${y.gps.lat.toFixed(6)}, ${y.gps.lng.toFixed(6)} ↗</a>`:'Not yet recorded'}</b></span></div>
     </div>
     <div class="dpanel"><h4>Contact</h4>
       <div class="drill-row"><span>Primary phone</span><span><b>${y.contact1||'—'}</b></span></div>
       <div class="drill-row"><span>Alternate phone</span><span><b>${y.contact2||'—'}</b></span></div>
     </div>
-    <p class="drill-note">GPS coordinates and a "name usually used" (nickname) aren't captured anywhere in the source data for this programme, so they can't be shown here — only village/parish text and the registered name exist. Likewise, identity verification (confirmed at the screening call) lives on a separate tracker with no reliable shared ID back to this list, so it can't be safely attributed to a specific person here — see the Persona KYC tab for the aggregate picture instead. "Availability for baseline" above is sourced from the screening-call notes where present; most records don't have it yet, since that field is only sparsely filled in at registration.</p>`;
+    <p class="drill-note">Familiar name, business location, GPS, and availability are all real fields on the Awareness sheet, live — but sparse (filled in for a minority of records so far), so "Not yet recorded" is expected for most people until their entry is more complete. Identity verification (confirmed at the screening call) lives on a separate tracker with no reliable shared ID back to this list, so it can't be safely attributed to a specific person here — see the Persona KYC tab for the aggregate picture instead.</p>`;
 }
 
 
@@ -2942,7 +2980,7 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
    tripped, or a sheet was renamed/moved), NONE of the live sections are
    applied — the dashboard keeps the embedded snapshot everywhere and the
    badge shows the error, rather than partially overwriting good data. */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaVyiLlF32ujSe0A4n2KpAT_2kj7AV7sc5FJ50z6EJ7licDXqMlOsmeSHtD81PCa5O/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwf0TBAFd27YOufk3nIml3-UL3dM1O9gQtBfENkn1w7T5BGhNCQew9OqfL0OC7bXZBx/exec';
 let LIVE_DATA_STATUS = 'offline'; // 'offline' | 'live' | 'error'
 let LIVE_DATA_TIMESTAMP = null;
 let LIVE_DATA_ERROR = null;

@@ -650,7 +650,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
 
   <div class="exec-band"><span class="num">3</span><h3>KYC screening bottleneck</h3><div class="rule"></div></div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Which criterion blocks the most youth?</h3><p>Each row is the number and share of screened youth who fail that single eligibility criterion — not mutually exclusive, since one youth can fail more than one. Click a row to drill by gender. <b>This table only</b> uses a tightened rule: Education S1&ndash;S5 (not P7&ndash;S5) and Income &ge; UGX 50,000/week (not 35,000) &mdash; every other table on this dashboard keeps the original rule.</p></div><span class="chip real">REAL</span></div>
+    <div class="panel-head"><div><h3>Which criterion blocks the most youth?</h3><p>Each row is the number and share of screened youth who fail that single eligibility criterion — not mutually exclusive, since one youth can fail more than one. Click a row to drill by gender. <b>This table only</b> uses the priority (education-adjusted) rule: Education S1&ndash;S5 only, P7 excluded &mdash; income stays at &ge; UGX 35,000/week, same as everywhere else on this dashboard.</p></div><span class="chip real">REAL</span></div>
     <table id="awareKycTable"></table>
   </div>
 
@@ -1274,7 +1274,7 @@ function awareDrillKycCriterion(label, failing, total){
   const genderRow = (g,label2) => { const cc=c[g]; const fail=cc.total-cc.pass; return `<div class="drill-row"><span>${label2}</span><span><b>${fmt(cc.pass)}</b> pass · <b style="color:var(--coral)">${fmt(fail)}</b> fail (of ${fmt(cc.total)})</span></div>`; };
   document.getElementById('drillBody').innerHTML = `
     <div class="dpanel"><h4>By gender</h4>${genderRow('female','Female')}${genderRow('male','Male')}</div>
-    <p class="drill-note">${fmt(failing)} of ${fmt(total)} registrants (${pctTxt(failing,total)}) fail this criterion, under the tightened rule used for this table (Education S1&ndash;S5, Income &ge; UGX 50,000/week).</p>`;
+    <p class="drill-note">${fmt(failing)} of ${fmt(total)} registrants (${pctTxt(failing,total)}) fail this criterion, under the priority (education-adjusted) rule used for this table (Education S1&ndash;S5 only, P7 excluded; income unchanged at &ge; UGX 35,000/week).</p>`;
 }
 
 function awareDrillBarrierTheme(key){
@@ -1470,8 +1470,8 @@ function renderExec(){
   // pending go-live wiring (2026-08-11); funnel now stops at Awareness (the only live domain).
   const stages = [
     ['Registered', A.registered, true],
-    ['Eligible', A.eligible_demographic, true],
     ['Interested', A.interested, true],
+    ['Eligible', A.eligible_demographic, true],
   ];
   const vals = stages.map(s=>s[1]);
   let worstIdx=1, worstLost=-1;
@@ -1573,13 +1573,17 @@ const BARRIERS_THEMATIC = {"total":396,"reported_any":394,"themes":[{"key":"doin
 const KYC_CRIT_LABELS = { interest:'Confirmed interest', consent:'Data consent given', age:'Age 18–30', education:'Education P7–S5', business:'Owns or co-owns a business', prior_training:'No prior Educate! training', income:'Income ≥ UGX 35,000/week' };
 const KYC_CRIT_ORDER = ['interest','consent','age','education','business','prior_training','income'];
 
-// Alternate criteria for the AWARENESS TAB's KYC screening bottleneck table ONLY, per request: education
-// tightened to S1–S5 (was P7–S5) and income raised to >= UGX 50,000/week (was >= 35,000/week). Everywhere
-// else in the dashboard (Persona KYC tab, Enumerator Worklist, division targets, live Apps Script data)
-// keeps the original P7–S5 / 35,000 rule — this is scoped to this one table only, as requested.
-// Recomputed directly from Recruitment - Cleaned's own derived criteria columns (education/age_/weekly_income/
-// owns_bus/Interest/consent_mva/prior_training), restricted to the 410 registrants with all 7 fields recorded.
-const AWARE_KYC_CRIT_LABELS = { interest:'Confirmed interest', consent:'Data consent given', age:'Age 18–30', education:'Education S1–S5', business:'Owns or co-owns a business', prior_training:'No prior Educate! training', income:'Income ≥ UGX 50,000/week' };
+// Priority (education-adjusted) criteria for the AWARENESS TAB's KYC screening bottleneck table
+// ONLY, per request: education adjusted to S1–S5 only (P7 excluded — P7 is a scheduling back-up,
+// see eduPriorityTag() in the Enumerator Worklist). Income is UNCHANGED at >= UGX 35,000/week —
+// same as everywhere else on this dashboard (Persona KYC tab, Enumerator Worklist, division
+// targets, live Apps Script data). Live via Code.gs's buildTightenedKyc(); AWARE_KYC_ALT below is
+// the offline-snapshot fallback only.
+const AWARE_KYC_CRIT_LABELS = { interest:'Confirmed interest', consent:'Data consent given', age:'Age 18–30', education:'Education S1–S5 (priority)', business:'Owns or co-owns a business', prior_training:'No prior Educate! training', income:'Income ≥ UGX 35,000/week' };
+// Offline-fallback snapshot only (used when DATA.awareness.tightened_kyc hasn't loaded, e.g. no
+// live connection) — computed under the OLD 50,000/week assumption before the 2026-08-11 income
+// correction, so its income row doesn't exactly match the current 35,000/week rule. Harmless: this
+// object is never shown once live data is available, which is the normal case.
 const AWARE_KYC_ALT = { total: 410, criteria: {"interest":{"female":{"pass":226,"total":227},"male":{"pass":183,"total":183}},"consent":{"female":{"pass":227,"total":227},"male":{"pass":183,"total":183}},"age":{"female":{"pass":222,"total":227},"male":{"pass":179,"total":183}},"education":{"female":{"pass":207,"total":227},"male":{"pass":171,"total":183}},"business":{"female":{"pass":227,"total":227},"male":{"pass":182,"total":183}},"prior_training":{"female":{"pass":221,"total":227},"male":{"pass":178,"total":183}},"income":{"female":{"pass":217,"total":227},"male":{"pass":180,"total":183}}} };
 
 function computeKycBottleneck(P, labels){
@@ -1604,11 +1608,15 @@ function renderAwareness(){
   const totElA = DIVISION_TARGETS.reduce((s,d)=>s+d.actual_eligible,0);
   // "Eligible — at Baseline" muted: BASELINE_ELIGIBILITY is June-pilot snapshot data (n=134),
   // not wired to the live RCT sheet — going live, we don't show demo numbers here (2026-08-11).
+  // "Priority-eligible" LIVE (2026-08-11): % of eligible registrants whose education is S1–S5
+  // (priority) rather than P7-only (scheduling back-up) — fired from Code.gs's buildAwarenessLive().
+  const PE = A.priority_eligibility;
   document.getElementById('awareKpi').innerHTML = [
     ['Registered', fmt(A.registered), '', true],
     ['Interested', fmt(A.interested), pctTxt(A.interested,A.registered), true],
     ['Eligible', fmt(A.eligible_demographic), pctTxt(A.eligible_demographic,A.registered), true],
     ['Eligible — vs target', fmt(totElA), pctTxt(totElA,totElT)+` of ${fmt(totElT)} programme-wide target`, true],
+    ['Priority-eligible (S1–S5)', PE?fmt(PE.priority):'—', PE?(pctTxt(PE.priority,PE.total)+' of eligible · education-adjusted, P7 excluded'):'Not live yet', !!PE],
     ['Eligible — at Baseline', '—', 'Not live yet', false],
   ].map(([l,v,s,live])=>`<div class="card"><span class="tag" ${live?'':'style="background:#EFEAE0;color:var(--muted);"'}>${live?(l.includes('target')?'REAL vs TARGET':'REAL'):'NOT LIVE'}</span><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join('');
 
@@ -1619,7 +1627,7 @@ function renderAwareness(){
   });
 
   // LIVE (2026-08-11): fired straight from the Awareness sheet (Code.gs's buildTightenedKyc()),
-  // same rows Persona KYC uses, just with the tightened S1–S5 / UGX 50,000/week thresholds.
+  // same rows Persona KYC uses, just with the priority (education-adjusted) S1–S5 rule — income unchanged at UGX 35,000/week.
   // Falls back to a "not live yet" placeholder only if the live field hasn't arrived
   // (e.g. viewing offline, or Code.gs not yet redeployed with this update).
   if (A.tightened_kyc && A.tightened_kyc.total) {
@@ -2647,12 +2655,29 @@ document.getElementById('gfReset').addEventListener('click', ()=>{
    this view has youth names, ages and phone numbers), this needs a real
    backend with per-role authentication (like the FastAPI+React version
    built separately), not a static file.
+
+   LOGIN PERSISTENCE (2026-08-11): the chosen role is remembered in the
+   browser's localStorage (was sessionStorage, which forgot it every time
+   the browser closed) — so returning visitors on the same device skip the
+   password prompt. Use the Logout button to clear it. Since the gate was
+   already cosmetic (see above — the data downloads regardless of password),
+   remembering the role for longer doesn't change what's actually protected.
    Change all three passwords below before sharing this link. */
 const STAFF_PASSWORD = 'Growth2026';
 const MOBILISER_PASSWORD = 'Mobiliser2026';
 const ENUMERATOR_PASSWORD = 'Enumerator2026';
 
 /* ================= LIVE DATA (Apps Script) =================
+   SPEED (2026-08-11): the dashboard no longer waits on the network before
+   showing anything. On load it reveals immediately using localStorage's
+   cached copy of the last successful live fetch (or the embedded snapshot,
+   if there's no cache yet), then fetches fresh data in the background and
+   silently re-renders the current tab once it lands — see egwTryLogin() and
+   the BOOTSTRAP section below. It also re-fetches automatically every 15
+   minutes while the tab stays open (see AUTO-REFRESH below), and Code.gs
+   itself caches its computed response for 5 minutes server-side, so repeat
+   loads across the team don't each force a full recompute.
+
    Paste your deployed Apps Script web app /exec URL below to make these
    pull live from the Google Sheet instead of this file's embedded snapshot:
      - Enumerator Worklist
@@ -2684,10 +2709,43 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
    tripped, or a sheet was renamed/moved), NONE of the live sections are
    applied — the dashboard keeps the embedded snapshot everywhere and the
    badge shows the error, rather than partially overwriting good data. */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7j6L0bKJDOqQewJzcaG4NT-KhSvFP-PfOM3ZahzeVuF8m-UWy_SQHZ7NxPvuYuKam/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUWixtDQoeVDDEs5rwz0rqRRHkU0v6Cc_CsOXAT1qwGLwhDu7Ho3F46nEEOYG4NPQ9/exec';
 let LIVE_DATA_STATUS = 'offline'; // 'offline' | 'live' | 'error'
 let LIVE_DATA_TIMESTAMP = null;
 let LIVE_DATA_ERROR = null;
+
+// Applies one live payload (from a fresh fetch OR from the localStorage
+// cache) to the dashboard's in-memory globals. Pulled out of
+// egwFetchLiveData() so both the cache-first path and the real fetch use
+// the exact same merge logic — no risk of them drifting apart.
+function egwApplyLivePayload(json){
+  if(json.enumerator_list) ENUMERATOR_LIST = json.enumerator_list;
+  if(json.baseline_tracking) BASELINE_TRACKING = json.baseline_tracking;
+  if(json.division_targets) DIVISION_TARGETS = json.division_targets;
+  if(json.persona_kyc) PERSONA_KYC = json.persona_kyc;
+  if(json.awareness) Object.assign(DATA.awareness, json.awareness); // merges live registered/interested/eligible, by_district, by_parish, daily trend, education, registration_drivers, gender, ineligibility_reasons, priority_eligibility, tightened_kyc, household_permission, guardian_relationship — fields not returned (eligibility_rule text, age_stats, income_buckets) stay on the snapshot
+  LIVE_DATA_STATUS = 'live';
+  LIVE_DATA_TIMESTAMP = json.generated_at || null;
+  LIVE_DATA_ERROR = null;
+}
+
+// localStorage cache of the last successful live fetch — lets the dashboard
+// show real (if slightly stale) numbers on the very first paint, instead of
+// the embedded June-pilot snapshot, without waiting on the network. See
+// egwTryLogin() / BOOTSTRAP below for where this gets applied.
+const EGW_LIVE_CACHE_KEY = 'egw_live_cache_v1';
+function egwApplyCachedLiveData(){
+  try{
+    const raw = localStorage.getItem(EGW_LIVE_CACHE_KEY);
+    if(!raw) return false;
+    const cached = JSON.parse(raw);
+    if(!cached || !cached.json) return false;
+    egwApplyLivePayload(cached.json);
+    return true;
+  } catch(err){
+    return false; // corrupt/unavailable cache — non-fatal, just skip it
+  }
+}
 
 async function egwFetchLiveData(){
   if(!APPS_SCRIPT_URL){ LIVE_DATA_STATUS = 'offline'; return; }
@@ -2710,14 +2768,9 @@ async function egwFetchLiveData(){
       // than risk mixing corrupted numbers into the dashboard.
       throw new Error('Live data error: ' + json.error);
     }
-    if(json.enumerator_list) ENUMERATOR_LIST = json.enumerator_list;
-    if(json.baseline_tracking) BASELINE_TRACKING = json.baseline_tracking;
-    if(json.division_targets) DIVISION_TARGETS = json.division_targets;
-    if(json.persona_kyc) PERSONA_KYC = json.persona_kyc;
-    if(json.awareness) Object.assign(DATA.awareness, json.awareness); // merges live registered/interested/eligible, by_district, by_parish, daily trend, education, registration_drivers, gender, ineligibility_reasons — fields not returned (eligibility_rule text, age_stats, income_buckets) stay on the snapshot
-    LIVE_DATA_STATUS = 'live';
-    LIVE_DATA_TIMESTAMP = json.generated_at || null;
-    LIVE_DATA_ERROR = null;
+    egwApplyLivePayload(json);
+    try{ localStorage.setItem(EGW_LIVE_CACHE_KEY, JSON.stringify({ json, cachedAt: Date.now() })); }
+    catch(cacheErr){ /* localStorage full/unavailable — non-fatal, just skip caching this round */ }
   } catch(err){
     console.warn('Live data fetch failed — falling back to the embedded snapshot:', err.message);
     LIVE_DATA_STATUS = 'error';
@@ -2767,9 +2820,13 @@ function egwApplyRole(role){
 }
 
 function egwLogout(){
-  sessionStorage.removeItem('egw_role');
+  localStorage.removeItem('egw_role');
   location.reload();
 }
+
+// After egwRefreshActiveTab() is defined below (AUTO-REFRESH), it re-renders
+// whichever tab is currently on screen once fresh data lands — used both by
+// the 15-minute auto-refresh and by the background fetch right after login.
 
 async function egwTryLogin(){
   const val = document.getElementById('loginPassword').value;
@@ -2782,19 +2839,37 @@ async function egwTryLogin(){
     return;
   }
   document.getElementById('loginError').textContent = '';
-  document.getElementById('loginSubmit').disabled = true;
-  document.getElementById('loginSubmit').textContent = 'Loading…';
-  sessionStorage.setItem('egw_role', role);
-  await egwFetchLiveData();
+  localStorage.setItem('egw_role', role);
+  // SPEED (2026-08-11): reveal the dashboard immediately using cached live
+  // data (if any) or the embedded snapshot — don't make the person wait on
+  // the network just to see the UI. Fetch fresh data in the background and
+  // silently re-render once it lands.
+  egwApplyCachedLiveData();
   egwApplyRole(role);
+  egwFetchLiveData().then(()=>{ egwUpdateLiveBadge(); egwRefreshActiveTab(); });
 }
 document.getElementById('loginSubmit').addEventListener('click', egwTryLogin);
 document.getElementById('loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') egwTryLogin(); });
 
+/* ================= AUTO-REFRESH ================= */
+// Re-fetches live data every 15 minutes while the tab stays open, then
+// re-renders whichever tab is currently on screen — no manual reload
+// needed to see updated numbers.
+function egwRefreshActiveTab(){
+  const activeTab = document.querySelector('.tab.active');
+  if(activeTab && window.STAGE_RENDER && window.STAGE_RENDER[activeTab.dataset.view]) window.STAGE_RENDER[activeTab.dataset.view]();
+}
+const EGW_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+setInterval(()=>{ egwFetchLiveData().then(()=>{ egwUpdateLiveBadge(); egwRefreshActiveTab(); }); }, EGW_REFRESH_INTERVAL_MS);
+
 /* ================= BOOTSTRAP ================= */
-const existingRole = sessionStorage.getItem('egw_role');
+const existingRole = localStorage.getItem('egw_role');
 if(existingRole === 'staff' || existingRole === 'mobiliser' || existingRole === 'enumerator'){
-  egwFetchLiveData().then(()=>egwApplyRole(existingRole));
+  // Same speed pattern as egwTryLogin(): reveal instantly from cache/snapshot,
+  // then fetch fresh data in the background.
+  egwApplyCachedLiveData();
+  egwApplyRole(existingRole);
+  egwFetchLiveData().then(()=>{ egwUpdateLiveBadge(); egwRefreshActiveTab(); });
 }
 
 </script>

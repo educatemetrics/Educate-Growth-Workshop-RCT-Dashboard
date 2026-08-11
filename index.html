@@ -1534,19 +1534,14 @@ function renderExec(){
   });
 
   // ---- 10: marketing (recruitment) vs. baseline overview ----
-  const RB = BASELINE_ANALYTICS.recruitment_vs_baseline;
-  const tRec = RB.by_district.reduce((s,d)=>s+d.recruited,0);
-  const tElg = RB.by_district.reduce((s,d)=>s+d.eligible,0);
-  const tBas = RB.by_district.reduce((s,d)=>s+d.baselined,0);
+  // MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot snapshot, no live source. See the same
+  // note on renderEnumBaselineAnalytics().
   document.getElementById('esMarketingBaselineKpi').innerHTML = [
-    { label:'Recruited (marketing)', value: fmt(tRec), sub:'Awareness registrations, all channels' },
-    { label:'Eligible', value: fmt(tElg), sub: pctTxt(tElg,tRec)+' of recruited' },
-    { label:'Baselined', value: fmt(tBas), sub: pctTxt(tBas,tRec)+' of all recruited · '+pctTxt(tBas,tElg)+' of eligible' },
-  ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
+    'Recruited (marketing)', 'Eligible', 'Baselined',
+  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
 
-  document.getElementById('esMarketingBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited (marketing)</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th><th>% of Eligible</th></tr>` +
-    RB.by_district.map(d=>`<tr class="kpi-clickable" onclick="enumDrillRecruitParish('${d.district}')"><td><b>${titleCase(d.district)}</b> ›</td><td>${fmt(d.recruited)}</td><td>${fmt(d.eligible)}</td><td>${fmt(d.baselined)}</td><td>${pctTxt(d.baselined,d.recruited)}</td><td>${pctTxt(d.baselined,d.eligible)}</td></tr>`).join('') +
-    `<tr style="font-weight:700;background:#FAF8F2;"><td>Total</td><td>${fmt(tRec)}</td><td>${fmt(tElg)}</td><td>${fmt(tBas)}</td><td>${pctTxt(tBas,tRec)}</td><td>${pctTxt(tBas,tElg)}</td></tr>`;
+  document.getElementById('esMarketingBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited (marketing)</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th><th>% of Eligible</th></tr>
+    <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
 
   renderProfitAnalysis('es');
 }
@@ -1720,7 +1715,7 @@ function renderBaselineTracking(){
     }).join('');
 
   document.getElementById('awareBaselineGenderTable').innerHTML = `<tr><th>Gender</th><th>Eligible</th><th>Baselined</th><th>% Baselined</th><th>Not Yet</th></tr>` +
-    Object.entries(B.by_gender).map(([g,v])=>{
+    Object.entries(B.by_gender || {}).map(([g,v])=>{
       const tot = v.baselined + v.not_yet;
       const p = pct(v.baselined, tot);
       return `<tr><td><b>${titleCase(g)}</b></td><td>${fmt(tot)}</td><td>${fmt(v.baselined)}</td><td style="color:${p>=50?'var(--green)':'var(--coral)'};font-weight:700">${p.toFixed(1)}%</td><td>${fmt(v.not_yet)}</td></tr>`;
@@ -1728,35 +1723,27 @@ function renderBaselineTracking(){
 
   renderProfitAnalysis('aware');
 
-  // ---- marketing vs. baseline, absolute numbers + eligibility (all Awareness registrants, not just eligible) ----
-  const RB = BASELINE_ANALYTICS.recruitment_vs_baseline;
-  const tRec = RB.by_district.reduce((s,d)=>s+d.recruited,0);
-  const tElg = RB.by_district.reduce((s,d)=>s+d.eligible,0);
-  const tBas = RB.by_district.reduce((s,d)=>s+d.baselined,0);
+  // ---- marketing vs. baseline, absolute numbers + eligibility ----
+  // MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot snapshot, no live source. See the same
+  // note on renderEnumBaselineAnalytics().
   document.getElementById('awareMarketingBaselineKpi').innerHTML = [
-    { label:'Recruited (marketing)', value: fmt(tRec), sub:'All Awareness registrations, any eligibility status' },
-    { label:'Eligible', value: fmt(tElg), sub: pctTxt(tElg,tRec)+' of recruited' },
-    { label:'Baselined', value: fmt(tBas), sub: pctTxt(tBas,tRec)+' of all recruited — overall baseline coverage' },
-  ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
+    'Recruited (marketing)', 'Eligible', 'Baselined',
+  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
 
-  document.getElementById('awareMarketingBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th></tr>` +
-    RB.by_district.map(d=>`<tr class="kpi-clickable" onclick="enumDrillRecruitParish('${d.district}')"><td><b>${titleCase(d.district)}</b> ›</td><td>${fmt(d.recruited)}</td><td>${fmt(d.eligible)}</td><td>${fmt(d.baselined)}</td><td>${pctTxt(d.baselined,d.recruited)}</td></tr>`).join('') +
-    `<tr style="font-weight:700;background:#FAF8F2;"><td>Total</td><td>${fmt(tRec)}</td><td>${fmt(tElg)}</td><td>${fmt(tBas)}</td><td>${pctTxt(tBas,tRec)}</td></tr>`;
+  document.getElementById('awareMarketingBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th></tr>
+    <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
 
-  const topParishes = [...RB.by_parish].sort((a,b)=>b.recruited-a.recruited).slice(0,10);
-  document.getElementById('awareMarketingBaselineParishTable').innerHTML = `<tr><th>Parish</th><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th></tr>` +
-    topParishes.map(p=>`<tr><td>${humanizeLoc(p.parish)}</td><td>${titleCase(p.district)}</td><td>${fmt(p.recruited)}</td><td>${fmt(p.eligible)}</td><td>${fmt(p.baselined)}</td></tr>`).join('');
+  document.getElementById('awareMarketingBaselineParishTable').innerHTML = `<tr><th>Parish</th><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th></tr>
+    <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
 
   // ---- data quality: likely-duplicate registrations ----
-  const D = DUPLICATES_ANALYSIS;
-  document.getElementById('awareDupNote').innerHTML = D.note;
+  // MUTED (2026-08-11): DUPLICATES_ANALYSIS is a June-pilot snapshot (n=607), no live source.
+  document.getElementById('awareDupNote').innerHTML = `<span style="color:var(--muted)">🔒 Not live yet — this panel used a June-pilot snapshot with no live source. Muted rather than shown as real.</span>`;
   document.getElementById('awareDupKpi').innerHTML = [
-    { label:'Registrations checked', value: fmt(D.total_registrants), sub: `${fmt(D.registrants_with_phone)} had a phone number to check against` },
-    { label:'Likely-duplicate phone numbers', value: fmt(D.duplicate_phone_groups), sub: 'Each used on 2+ registrations' },
-    { label:'Registrations involved', value: fmt(D.rows_involved), sub: pctTxt(D.rows_involved, D.total_registrants)+' of all registrations' },
-  ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
-  document.getElementById('awareDupTable').innerHTML = `<tr><th>District</th><th>Registrations on a duplicated phone number</th></tr>` +
-    Object.entries(D.by_district).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`<tr><td><b>${titleCase(d)}</b></td><td>${fmt(n)}</td></tr>`).join('');
+    'Registrations checked', 'Likely-duplicate phone numbers', 'Registrations involved',
+  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
+  document.getElementById('awareDupTable').innerHTML = `<tr><th>District</th><th>Registrations on a duplicated phone number</th></tr>
+    <tr><td colspan="2" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
 }
 
 /* ================= MOBILISATION ================= */
@@ -2088,25 +2075,15 @@ function mtDrillMobiliserParish(name){
     <div class="dpanel"><h4>Parishes visited</h4>${parishRows || '<p class="drill-note">No parish data for this filter.</p>'}</div>
     <p class="drill-note">The mobiliser tracker logs which parishes were visited each day, but not a per-mobiliser split of registrations within each parish — so the figures above are parish-wide totals (from the Awareness tab), not specifically this mobiliser's count in that parish. Visit-days show how often this mobiliser worked there.</p>`;
 }
+// MUTED (2026-08-11): the mobiliser-select dropdown and everything below except the Location Target
+// Table are built from MOB_DAILY, a June-pilot snapshot of day-by-day mobiliser call/registration logs
+// with no live source — that data lives on a Mobilisation-domain sheet Code.gs doesn't read yet. Per
+// the no-demo-data policy, muted rather than shown as real. Location Target Table stays live (it's
+// sourced from DIVISION_TARGETS, which Code.gs does compute live).
 function renderMobTrack(){
-  // populate mobiliser select once
-  const sel = document.getElementById('mtMobiliser');
-  if(sel && sel.options.length<=1){
-    [...new Set(MOB_DAILY.map(r=>r.mobiliser))].sort().forEach(n=>{
-      const opt = document.createElement('option'); opt.value=n; opt.textContent=n; sel.appendChild(opt);
-    });
-  }
-
-  const rows = mtFilteredRows();
-  const isFiltered = FILTER_DISTRICT || FILTER_MOBILISER;
-  const registered = rows.reduce((s,r)=>s+r.registered,0);
-  const eligible = rows.reduce((s,r)=>s+r.eligible,0);
-  const eligibleFemale = rows.reduce((s,r)=>s+r.eligible_female,0);
   document.getElementById('mtKpi').innerHTML = [
-    ['Registered', fmt(registered), isFiltered ? 'For this filter' : 'All mobilisers, to date'],
-    ['Eligible', fmt(eligible), pctTxt(eligible, registered)+' of registered'],
-    ['Eligible Female', fmt(eligibleFemale), pctTxt(eligibleFemale, eligible)+' of eligible · 60% target'],
-  ].map(([l,v,s])=>`<div class="card"><span class="tag">REAL</span><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join('');
+    'Registered', 'Eligible', 'Eligible Female',
+  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div><div class="sub">Daily mobiliser logs aren't wired to live data yet</div></div>`).join('');
 
   // ---- location target table (master plan, from Marit's targets PDF) ----
   document.getElementById('mtLocationTargetTable').innerHTML = `<tr><th>Location</th><th>Status</th><th>Eligible-interested<br>Target</th><th>Actual</th><th>% of Target</th><th>Baseline Target</th><th>Baselined (Actual)</th><th>% of Target</th><th>Assigned mobilisers (plan)</th></tr>` +
@@ -2123,83 +2100,18 @@ function renderMobTrack(){
             totBlT=DIVISION_TARGETS.reduce((s,d)=>s+d.baseline_target,0), totBlA=DIVISION_TARGETS.reduce((s,d)=>s+d.actual_baselined,0);
       return `<tr style="font-weight:700;background:#FAF8F2;"><td>Total</td><td></td><td>${fmt(totElT)}</td><td>${fmt(totElA)}</td><td>${pctTxt(totElA,totElT)}</td><td>${fmt(totBlT)}</td><td>${fmt(totBlA)}</td><td>${pctTxt(totBlA,totBlT)}</td><td></td></tr>`; })();
 
-  const g = mtGroupByMobiliser(rows);
-  const names = Object.keys(g).sort();
-  let totReg=0, totElig=0, totEf=0, totTarget=0;
-  const body = names.map(name=>{
-    const o = g[name];
-    const days = o.dates.size;
-    const target = days * MT_DAILY_TARGET;
-    const ratio = target ? o.registered/target : 0;
-    totReg += o.registered; totElig += o.eligible; totEf += o.eligible_female; totTarget += target;
-    return `<tr class="kpi-clickable" onclick="mtDrillMobiliserParish('${name}')">
-      <td><b>${name}</b> ›</td>
-      <td>${fmt(o.registered)}</td>
-      <td>${fmt(o.eligible)}</td>
-      <td>${pctTxt(o.eligible,o.registered)}</td>
-      <td>${fmt(o.eligible_female)}</td>
-      <td style="color:${pct(o.eligible_female,o.eligible)>=50?'var(--green)':'var(--coral)'};font-weight:700">${pctTxt(o.eligible_female,o.eligible)}</td>
-      <td title="${[...o.parishes].join(', ')}">${o.parishes.size}</td>
-      <td>${days}</td>
-      <td>${fmt(target)}</td>
-      <td>${cfCell(ratio)}</td>
-    </tr>`;
-  }).join('');
-  const totRatio = totTarget ? totElig/totTarget : 0;
-  const totalRow = names.length ? `<tr class="total-row">
-      <td>TOTAL</td><td>${fmt(totReg)}</td><td>${fmt(totElig)}</td><td>${pctTxt(totElig,totReg)}</td>
-      <td>${fmt(totEf)}</td><td>${pctTxt(totEf,totElig)}</td><td>—</td><td>—</td>
-      <td>${fmt(totTarget)}</td><td>${cfCell(totRatio)}</td>
-    </tr>` : '';
   document.getElementById('mtCumulativeTable').innerHTML =
-    `<tr><th>Mobiliser</th><th>Registered</th><th>Eligible</th><th>% Eligible</th><th>Eligible Female</th><th>% Elig. Female</th><th>Parishes Covered</th><th>Days Active</th><th>Target</th><th>% Target Achieved</th></tr>` +
-    (body || `<tr><td colspan="10" style="text-align:center;color:var(--muted)">No records for this filter.</td></tr>`) + totalRow;
-  document.getElementById('mtCfLegend1').innerHTML = CF_LEGEND_HTML;
+    `<tr><th>Mobiliser</th><th>Registered</th><th>Eligible</th><th>% Eligible</th><th>Eligible Female</th><th>% Elig. Female</th><th>Parishes Covered</th><th>Days Active</th><th>Target</th><th>% Target Achieved</th></tr>
+    <tr><td colspan="10" style="text-align:center;color:var(--muted)">Not live yet — daily mobiliser logs aren't wired to live data.</td></tr>`;
+  document.getElementById('mtCfLegend1').innerHTML = '';
 
-  const barPct = Math.min(100, totRatio*100);
-  const cls = totRatio>=1?'rag-green':totRatio>=0.8?'rag-amber':'rag-red';
-  const txtCls = totRatio>=1?'rag-txt-green':totRatio>=0.8?'rag-txt-amber':'rag-txt-red';
-  document.getElementById('mtOverallBar').className = 'progbar-fill '+cls;
-  document.getElementById('mtOverallBar').style.width = barPct+'%';
-  document.getElementById('mtOverallBar').textContent = (totRatio*100).toFixed(0)+'%';
-  document.getElementById('mtOverallText').innerHTML = totTarget
-    ? `<b class="${txtCls}">${fmt(totElig)} of ${fmt(totTarget)}</b> targeted registrations were eligible (${(totRatio*100).toFixed(1)}%), out of ${fmt(totReg)} total registered — across ${names.length} mobiliser${names.length===1?'':'s'} and ${[...new Set(rows.map(r=>r.date))].length} active day${rows.length===1?'':'s'}.`
-    : 'No records for this filter.';
+  document.getElementById('mtOverallBar').className = 'progbar-fill';
+  document.getElementById('mtOverallBar').style.width = '0%';
+  document.getElementById('mtOverallBar').textContent = '';
+  document.getElementById('mtOverallText').innerHTML = '<span style="color:var(--muted)">Not live yet — daily mobiliser logs aren\'t wired to live data.</span>';
 
-  // Day-by-day pivot: one row per mobiliser + daily target, repeating 4-column block per date, most recent first.
-  const dates = [...new Set(rows.map(r=>r.date))].sort().reverse();
-  const byMobDate = {};
-  names.forEach(m=>{ byMobDate[m] = {}; });
-  rows.forEach(r=>{ if(!byMobDate[r.mobiliser]) byMobDate[r.mobiliser]={}; byMobDate[r.mobiliser][r.date] = r; });
-
-  if(!names.length || !dates.length){
-    document.getElementById('mtDailyTable').innerHTML = `<tr><th>Mobiliser's Name</th><th>Daily Target</th></tr><tr><td colspan="2" style="text-align:center;color:var(--muted)">No records for this filter.</td></tr>`;
-    document.getElementById('mtCfLegend2').innerHTML = '';
-    return;
-  }
-  const headerRow1 = `<tr>
-      <th class="sticky-col sticky-name" rowspan="2">Mobiliser's Name</th>
-      <th class="sticky-col sticky-target" rowspan="2">Daily Target</th>
-      ${dates.map(d=>`<th class="date-group" colspan="4">${d}</th>`).join('')}
-    </tr>`;
-  const headerRow2 = `<tr>
-      ${dates.map(()=>`<th class="date-first">#&nbsp;Registered</th><th>#&nbsp;Eligible</th><th>%&nbsp;Target&nbsp;Achieved</th><th># Females Eligible</th>`).join('')}
-    </tr>`;
-  const dailyBody = names.map(m=>{
-    const cells = dates.map((d,i)=>{
-      const r = byMobDate[m][d];
-      const firstCls = i===0 ? ' date-first' : '';
-      if(!r) return `<td class="${firstCls.trim()}" style="text-align:center;color:var(--muted)">-</td><td style="text-align:center;color:var(--muted)">-</td><td style="text-align:center;color:var(--muted)">-</td><td style="text-align:center;color:var(--muted)">-</td>`;
-      const ratio = r.registered/MT_DAILY_TARGET;
-      return `<td class="${firstCls.trim()}" style="text-align:center">${fmt(r.registered)}</td>` +
-        `<td style="text-align:center">${fmt(r.eligible)}</td>` +
-        `<td style="text-align:center">${cfCell(ratio)}</td>` +
-        `<td style="text-align:center">${fmt(r.eligible_female)}</td>`;
-    }).join('');
-    return `<tr><td class="sticky-col sticky-name"><b>${m}</b></td><td class="sticky-col sticky-target">${MT_DAILY_TARGET}</td>${cells}</tr>`;
-  }).join('');
-  document.getElementById('mtDailyTable').innerHTML = headerRow1 + headerRow2 + dailyBody;
-  document.getElementById('mtCfLegend2').innerHTML = CF_LEGEND_HTML;
+  document.getElementById('mtDailyTable').innerHTML = `<tr><th>Mobiliser's Name</th><th>Daily Target</th></tr><tr><td colspan="2" style="text-align:center;color:var(--muted)">Not live yet.</td></tr>`;
+  document.getElementById('mtCfLegend2').innerHTML = '';
 }
 document.getElementById('mtMobiliser').addEventListener('change', (e)=>{ FILTER_MOBILISER = e.target.value; renderMobTrack(); });
 document.getElementById('enumParish').addEventListener('change', (e)=>{ FILTER_PARISH = e.target.value; renderEnumerator(); });
@@ -2488,61 +2400,41 @@ function renderEnumerator(){
   renderEnumBaselineAnalytics();
 }
 
+// MUTED (2026-08-11): BASELINE_ANALYTICS is a June-pilot Baseline snapshot (n=134/607) with no live
+// source — Code.gs's buildBaselineTracking() only links youth_id for the baselined/not_yet counts,
+// it doesn't compute income, recruitment-vs-baseline, or per-enumerator entry counts. Blank rather
+// than show pilot numbers under a "REAL" tag.
 function renderEnumBaselineAnalytics(){
-  const BA = BASELINE_ANALYTICS;
-  const inc = BA.income;
   document.getElementById('enumAnalyticsKpi').innerHTML = [
-    { label:'Avg. income at baseline (2-week)', value: 'UGX ' + fmt(Math.round(inc.overall.weekly_mean*2)), sub: `= UGX ${fmt(Math.round(inc.overall.weekly_mean))}/week avg. × 2 · median UGX ${fmt(Math.round(inc.overall.weekly_median*2))} · n=${fmt(inc.overall.n)}, all baseline entries` },
-    { label:'Avg. income, eligible-at-baseline', value: 'UGX ' + fmt(Math.round(inc.eligible_linked.weekly_mean*2)), sub: `= UGX ${fmt(Math.round(inc.eligible_linked.weekly_mean))}/week avg. × 2 · n=${fmt(inc.eligible_linked.n)}, linked to the Awareness eligible-youth list` },
-    { label:'Recruited (all Awareness)', value: fmt(BA.recruitment_vs_baseline.by_district.reduce((s,d)=>s+d.recruited,0)), sub: 'Programme-wide, regardless of eligibility' },
-    { label:'Baselined, of all recruited', value: fmt(BA.recruitment_vs_baseline.by_district.reduce((s,d)=>s+d.baselined,0)), sub: pctTxt(BA.recruitment_vs_baseline.by_district.reduce((s,d)=>s+d.baselined,0), BA.recruitment_vs_baseline.by_district.reduce((s,d)=>s+d.recruited,0))+' of all recruited (not just the eligible subset)' },
-  ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
+    'Avg. income at baseline (2-week)', 'Avg. income, eligible-at-baseline', 'Recruited (all Awareness)', 'Baselined, of all recruited',
+  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
 
-  document.getElementById('enumRecruitVsBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th><th>% of Eligible</th></tr>` +
-    BA.recruitment_vs_baseline.by_district.map(d=>`<tr class="kpi-clickable" onclick="enumDrillRecruitParish('${d.district}')"><td><b>${titleCase(d.district)}</b> ›</td><td>${fmt(d.recruited)}</td><td>${fmt(d.eligible)}</td><td>${fmt(d.baselined)}</td><td>${pctTxt(d.baselined,d.recruited)}</td><td>${pctTxt(d.baselined,d.eligible)}</td></tr>`).join('') +
-    (()=>{ const tR=BA.recruitment_vs_baseline.by_district.reduce((s,d)=>s+d.recruited,0), tE=BA.recruitment_vs_baseline.by_district.reduce((s,d)=>s+d.eligible,0), tB=BA.recruitment_vs_baseline.by_district.reduce((s,d)=>s+d.baselined,0);
-      return `<tr style="font-weight:700;background:#FAF8F2;"><td>Total</td><td>${fmt(tR)}</td><td>${fmt(tE)}</td><td>${fmt(tB)}</td><td>${pctTxt(tB,tR)}</td><td>${pctTxt(tB,tE)}</td></tr>`; })();
+  document.getElementById('enumRecruitVsBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th><th>% of Eligible</th></tr>
+    <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
 
-  const sortedEnum = [...BA.entries_per_enumerator].sort((a,b)=>b.entries-a.entries);
-  document.getElementById('enumByEnumeratorTable').innerHTML = `<tr><th>Enumerator</th><th>Baseline entries</th></tr>` +
-    sortedEnum.map(e=>`<tr><td>${e.name}</td><td>${fmt(e.entries)}</td></tr>`).join('');
+  document.getElementById('enumByEnumeratorTable').innerHTML = `<tr><th>Enumerator</th><th>Baseline entries</th></tr>
+    <tr><td colspan="2" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
 
   renderProfitAnalysis('enum');
 }
 
 // Shared income-vs-net-profit renderer, reused on the Enumerator Worklist, Executive Summary, and the
-// Awareness tab's baseline tracking band ("all of the above", per the Aug 2026 comments). `prefix` picks
-// which set of DOM ids to fill: enum / es / aware.
+// Awareness tab's baseline tracking band. MUTED (2026-08-11): NET_PROFIT_ANALYSIS is a June-pilot
+// Baseline snapshot (n=134) with no live source — Code.gs doesn't compute this from the live Baseline
+// tab. Per the no-demo-data policy, blank rather than show pilot numbers under a "REAL" tag.
 function renderProfitAnalysis(prefix){
-  const NP = NET_PROFIT_ANALYSIS;
-  const target = NP.income_target_weekly;
-  const o = NP.overall;
   const noteEl = document.getElementById(prefix+'ProfitNote');
-  if(noteEl) noteEl.innerHTML = `${NP.note} Reference line: the UGX ${fmt(target)}/week eligibility threshold — the only income-related number already defined in this dashboard — shown for orientation, not an official income target.`;
+  if(noteEl) noteEl.innerHTML = `<span style="color:var(--muted)">🔒 Not live yet — this panel used a June-pilot Baseline snapshot (n=134) with no live source. Muted rather than shown as real.</span>`;
 
   const kpiEl = document.getElementById(prefix+'ProfitKpi');
   if(kpiEl) kpiEl.innerHTML = [
-    { label:'Avg. weekly income at baseline', value:'UGX '+fmt(Math.round(o.income_weekly_mean)), sub:`median UGX ${fmt(Math.round(o.income_weekly_median))} · n=${fmt(o.n)}` },
-    { label:'Avg. weekly-equiv. net profit', value:'UGX '+fmt(Math.round(o.profit_weekly_equiv_mean)), sub:`= 3-day profit UGX ${fmt(Math.round(o.profit_3day_mean))} avg. × 7/3 · median UGX ${fmt(Math.round(o.profit_weekly_equiv_median))}` },
-    { label:'Median income vs. eligibility threshold', value: pctTxt(o.income_weekly_median, target), sub:`UGX ${fmt(o.income_weekly_median)} median vs. UGX ${fmt(target)}/week threshold` },
-  ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
-
-  const districts = Object.keys(NP.by_district);
-  const chartId = prefix+'ProfitChart';
-  if(document.getElementById(chartId)) mk(chartId, {
-    type:'bar',
-    data:{ labels: districts.map(titleCase), datasets:[
-      { label:'Avg. weekly income', data: districts.map(d=>NP.by_district[d].income_weekly_mean), backgroundColor: coral },
-      { label:'Avg. weekly-equiv. net profit', data: districts.map(d=>NP.by_district[d].profit_weekly_equiv_mean), backgroundColor: teal },
-      { type:'line', label:`UGX ${fmt(target)}/week threshold`, data: districts.map(()=>target), borderColor: muted, borderDash:[5,4], pointRadius:0, datalabels:{display:false} },
-    ]},
-    options:{ plugins:{legend:{display:true}}, scales:{ y:{ beginAtZero:true } } }
-  });
+    'Avg. weekly income at baseline', 'Avg. weekly-equiv. net profit', 'Median income vs. eligibility threshold',
+  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
 
   const tableEl = document.getElementById(prefix+'ProfitTable');
-  if(tableEl) tableEl.innerHTML = `<tr><th>District</th><th>n</th><th>Avg. weekly income</th><th>Median weekly income</th><th>Avg. weekly-equiv. profit</th><th>Median weekly-equiv. profit</th></tr>` +
-    districts.map(d=>{ const v = NP.by_district[d]; return `<tr><td><b>${titleCase(d)}</b></td><td>${fmt(v.n)}</td><td>UGX ${fmt(Math.round(v.income_weekly_mean))}</td><td>UGX ${fmt(v.income_weekly_median)}</td><td>UGX ${fmt(Math.round(v.profit_weekly_equiv_mean))}</td><td>UGX ${fmt(v.profit_weekly_equiv_median)}</td></tr>`; }).join('') +
-    `<tr style="font-weight:700;background:#FAF8F2;"><td>Overall</td><td>${fmt(o.n)}</td><td>UGX ${fmt(Math.round(o.income_weekly_mean))}</td><td>UGX ${fmt(o.income_weekly_median)}</td><td>UGX ${fmt(Math.round(o.profit_weekly_equiv_mean))}</td><td>UGX ${fmt(o.profit_weekly_equiv_median)}</td></tr>`;
+  if(tableEl) tableEl.innerHTML = `<tr><th>District</th><th>n</th><th>Avg. weekly income</th><th>Median weekly income</th><th>Avg. weekly-equiv. profit</th><th>Median weekly-equiv. profit</th></tr>
+    <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
+  // chartId canvas intentionally left un-rendered — no live source to chart.
 }
 
 function enumDrillRecruitParish(district){
@@ -2670,13 +2562,25 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
 /* ================= LIVE DATA (Apps Script) =================
    SPEED (2026-08-11): the dashboard no longer waits on the network before
    showing anything. On load it reveals immediately using localStorage's
-   cached copy of the last successful live fetch (or the embedded snapshot,
-   if there's no cache yet), then fetches fresh data in the background and
-   silently re-renders the current tab once it lands — see egwTryLogin() and
-   the BOOTSTRAP section below. It also re-fetches automatically every 15
+   cached copy of the last successful live fetch (or blanks, if there's no
+   cache yet — see BLANK-BEFORE-LIVE below; never the June-pilot embedded
+   snapshot), then fetches fresh data in the background and silently
+   re-renders the current tab once it lands — see egwTryLogin() and the
+   BOOTSTRAP section below. It also re-fetches automatically every 15
    minutes while the tab stays open (see AUTO-REFRESH below), and Code.gs
    itself caches its computed response for 5 minutes server-side, so repeat
    loads across the team don't each force a full recompute.
+
+   NO-DEMO-DATA POLICY (2026-08-11): sections that are meant to be live
+   (Enumerator Worklist, Baseline tracking, Division targets, Persona KYC,
+   the Awareness tab's funnel) never fall back to the embedded June-pilot
+   snapshot anymore. Before live data has ever loaded, or after a
+   connectivity failure with nothing cached, they show blanks/zeros instead
+   — see BLANK-BEFORE-LIVE near the bottom of this script. Sections with NO
+   live source at all (Mobiliser Tracker's daily logs, the various
+   Baseline-analytics/net-profit panels) are permanently muted the same way
+   Mobilisation/Acquisition were — not tied to connectivity, since wiring
+   them live isn't possible yet regardless of network status.
 
    Paste your deployed Apps Script web app /exec URL below to make these
    pull live from the Google Sheet instead of this file's embedded snapshot:
@@ -2709,7 +2613,7 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
    tripped, or a sheet was renamed/moved), NONE of the live sections are
    applied — the dashboard keeps the embedded snapshot everywhere and the
    badge shows the error, rather than partially overwriting good data. */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUWixtDQoeVDDEs5rwz0rqRRHkU0v6Cc_CsOXAT1qwGLwhDu7Ho3F46nEEOYG4NPQ9/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiNkE2uqaeNr7JzeKvslwnbN5SeVCsZFzTIU4pNE-jtV7nx5ws2YXtE5U598sIpyiP/exec';
 let LIVE_DATA_STATUS = 'offline'; // 'offline' | 'live' | 'error'
 let LIVE_DATA_TIMESTAMP = null;
 let LIVE_DATA_ERROR = null;
@@ -2788,7 +2692,10 @@ function egwUpdateLiveBadge(){
   } else if(LIVE_DATA_STATUS === 'error'){
     el.style.display = '';
     el.title = LIVE_DATA_ERROR || '';
-    el.textContent = 'LIVE FETCH FAILED — showing snapshot';
+    // Text reflects the 2026-08-11 no-demo-data policy: on a connectivity failure the
+    // dashboard shows blanks (or the last successfully-cached real data, if any is
+    // cached) — never the June-pilot embedded snapshot.
+    el.textContent = 'LIVE FETCH FAILED — showing blanks, not demo data';
   } else {
     el.style.display = 'none';
   }
@@ -2841,9 +2748,10 @@ async function egwTryLogin(){
   document.getElementById('loginError').textContent = '';
   localStorage.setItem('egw_role', role);
   // SPEED (2026-08-11): reveal the dashboard immediately using cached live
-  // data (if any) or the embedded snapshot — don't make the person wait on
-  // the network just to see the UI. Fetch fresh data in the background and
-  // silently re-render once it lands.
+  // data (if any) or blanks (never the embedded snapshot — see
+  // BLANK-BEFORE-LIVE) — don't make the person wait on the network just to
+  // see the UI. Fetch fresh data in the background and silently re-render
+  // once it lands.
   egwApplyCachedLiveData();
   egwApplyRole(role);
   egwFetchLiveData().then(()=>{ egwUpdateLiveBadge(); egwRefreshActiveTab(); });
@@ -2861,6 +2769,73 @@ function egwRefreshActiveTab(){
 }
 const EGW_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
 setInterval(()=>{ egwFetchLiveData().then(()=>{ egwUpdateLiveBadge(); egwRefreshActiveTab(); }); }, EGW_REFRESH_INTERVAL_MS);
+
+/* ================= BLANK-BEFORE-LIVE ================= */
+// Policy (2026-08-11): never show demo/snapshot numbers for sections that are
+// meant to be live. ENUMERATOR_LIST, BASELINE_TRACKING, DIVISION_TARGETS'
+// actuals, PERSONA_KYC, and DATA.awareness's live-sourced fields all start
+// life as June-pilot embedded snapshot values (declared far above). Reset
+// them to blank/zero here, ONCE, before BOOTSTRAP applies any cached live
+// data or renders anything — so a first-ever visit with no cache, or a
+// connectivity failure, shows blanks instead of pilot numbers. Real data
+// (from localStorage cache or a fresh fetch) overwrites these normally via
+// egwApplyLivePayload() — this only affects what shows before that happens.
+function egwBlankPersonaKycSlice(){
+  const critKeys = ['interest','consent','age','education','business','prior_training','income'];
+  const critLabels = { interest:'Confirmed interest', consent:'Data consent given', age:'Age 18–30', education:'Education P7–S5', business:'Owns or co-owns a business', prior_training:'No prior Educate! training', income:'Income ≥ UGX 35,000/week' };
+  const criteria = {};
+  critKeys.forEach(k=>{ criteria[k] = { label: critLabels[k], female:{pass:0,total:0}, male:{pass:0,total:0} }; });
+  const singleFailCounts = {}; critKeys.forEach(k=>{ singleFailCounts[k]=0; });
+  const emptyBucket = (order)=>({ order: order.slice(), female:{}, male:{} });
+  return {
+    total: 0, female_total: 0, male_total: 0,
+    criteria,
+    eligibility_overall: { female:{pass:0,total:0}, male:{pass:0,total:0} },
+    ineligible_total: 0,
+    single_fail_counts: singleFailCounts,
+    buckets: {
+      age: emptyBucket(['<18','18-20','21-23','24-26','27-30','>30']), age_eligible_only: emptyBucket(['<18','18-20','21-23','24-26','27-30','>30']),
+      income: emptyBucket(['<35k','35k-50k','50k-100k','100k+']), income_eligible_only: emptyBucket(['<35k','35k-50k','50k-100k','100k+']),
+      education: emptyBucket([]), education_eligible_only: emptyBucket([])
+    },
+    context: { marital: {female:{married:0,single:0,other:0},male:{married:0,single:0,other:0}}, phone: {female:{yes:0,no:0},male:{yes:0,no:0}} }
+  };
+}
+function egwBlankAwarenessLiveFields(){
+  DATA.awareness.registered = 0;
+  DATA.awareness.interested = 0;
+  DATA.awareness.eligible_demographic = 0;
+  DATA.awareness.eligible = 0;
+  // Pre-seeded with the 5 known districts (zeroed) rather than left fully
+  // empty — awareDrillDistricts() and similar read by_district[d] directly
+  // for each of these without a fallback, so an empty {} would throw when
+  // a drill is clicked before live data arrives.
+  const blankDistrictEntry = ()=>({ registered:0, eligible:0, female_pct:0 });
+  DATA.awareness.by_district = { IGANGA:blankDistrictEntry(), JINJA:blankDistrictEntry(), LUWEERO:blankDistrictEntry(), MASAKA:blankDistrictEntry(), MPIGI:blankDistrictEntry() };
+  DATA.awareness.by_parish = {};
+  DATA.awareness.by_gender_all = { female:0, male:0 };
+  DATA.awareness.by_gender_eligible = { female:0, male:0 };
+  DATA.awareness.education_level = {};
+  DATA.awareness.registration_drivers = {};
+  DATA.awareness.ineligibility_reasons = {};
+  DATA.awareness.daily_eligible_trend = [];
+  // Left null on purpose — render code already treats these as "not live yet"
+  // when absent (see renderAwareness()/renderPersonaKYC()'s existing guards).
+  DATA.awareness.priority_eligibility = null;
+  DATA.awareness.tightened_kyc = null;
+  DATA.awareness.household_permission = null;
+  DATA.awareness.guardian_relationship = null;
+}
+function egwBlankLiveDomain(){
+  ENUMERATOR_LIST = [];
+  BASELINE_TRACKING = { total_eligible:0, baselined:0, not_yet:0, unassigned_count:0, by_district:{}, by_gender:{} };
+  // DIVISION_TARGETS mixes real static plan data (location/eligible_target/baseline_target/mobilisers,
+  // set by staff, not derived from submissions) with live-computed actuals — only zero the actuals.
+  DIVISION_TARGETS = DIVISION_TARGETS.map(d=>({ ...d, actual_eligible:0, actual_baselined:0, status:'not_started' }));
+  PERSONA_KYC = { '': egwBlankPersonaKycSlice() };
+  egwBlankAwarenessLiveFields();
+}
+egwBlankLiveDomain();
 
 /* ================= BOOTSTRAP ================= */
 const existingRole = localStorage.getItem('egw_role');

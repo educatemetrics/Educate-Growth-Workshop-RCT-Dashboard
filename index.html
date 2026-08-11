@@ -410,6 +410,9 @@ td.glink-cell:hover{background:#FBF3E3;}
 .logout-btn:hover{background:rgba(255,255,255,.18);}
 body.role-mobiliser .grouptabs, body.role-mobiliser .subtabs{display:none;}
 body.role-enumerator .grouptabs, body.role-enumerator .subtabs{display:none;}
+/* 2026-08-11: 'staff' (Growth2026) no longer sees the Enumerator Worklist group tab (youth
+   names/phone numbers) — only 'admin' does. Hides just this one group tab, not full nav. */
+body.role-staff .gtab[data-group="enum"]{display:none;}
 
 /* ===================== CONDITIONAL-FORMATTING CELLS (shared) ===================== */
 /* 4-tone: mobiliser daily-target achievement */
@@ -577,7 +580,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
   <div class="panel">
     <div class="panel-head"><div><h3>Registered → Eligible → Interested → Mobilised → Reached → Confirmed → Acquired</h3><p>Each stage shows count, % of the previous stage, and youth lost. The largest single drop-off is flagged automatically. Click a stage to drill by district.</p></div><span class="chip real">REAL endpoints</span></div>
     <div class="funnel" id="execFunnel"></div>
-    <p style="font-size:11.5px;color:var(--muted);margin-top:10px;">Mobilised is drawn from a separate call-tracker form and isn't a strict subset of Interested — see the Guide for why the two trackers don't nest perfectly.</p>
+    <p style="font-size:11.5px;color:var(--muted);margin-top:10px;">Mobilised comes from a separate call-tracker form, not a strict subset of Interested (see Guide).</p>
   </div>
 
   <div class="exec-band"><span class="num">6</span><h3>Attrition through funnel</h3><div class="rule"></div></div>
@@ -603,7 +606,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
   </div>
 
   <div class="exec-band"><span class="num">9</span><h3>Marketing vs. baseline overview</h3><div class="rule"></div></div>
-  <div class="note">"Marketing" = Awareness-stage recruitment (registered, eligible). "Baseline" = confirmed baseline surveys. Added in response to the Aug 2026 dashboard comments, asking for these side by side.</div>
+  <div class="note">"Marketing" = Awareness-stage recruitment (registered, eligible). "Baseline" = confirmed baseline surveys.</div>
   <div class="grid" id="esMarketingBaselineKpi"></div>
   <div class="panel">
     <div class="panel-head"><div><h3>Recruitment (marketing) vs. baseline, by district</h3><p>Recruited = every Awareness registrant, not just those who ended up eligible.</p></div><span class="chip real">REAL</span></div>
@@ -639,7 +642,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
 
   <div class="exec-band"><span class="num">2</span><h3>Gender by funnel stage</h3><div class="rule"></div></div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Registered vs eligible, by gender</h3><p>Interested isn't broken out by gender in the source tracker.</p></div><span class="chip real">REAL</span></div>
+    <div class="panel-head"><div><h3>Registered vs eligible, by gender</h3><p>Interested is not available by gender.</p></div><span class="chip real">REAL</span></div>
     <table id="awareGenderTable"></table>
   </div>
 
@@ -656,27 +659,16 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
   </div>
 
   <div class="exec-band"><span class="num">5</span><h3>Commitment screening</h3><div class="rule"></div></div>
-  <div class="note">A more detailed screening layer defined for the RCT survey — five probe questions that turn each anticipated barrier above into a scored (0&ndash;2) commitment signal, so screeners can prioritise rather than reject borderline youth. These questions are part of the same live Awareness/KYC intake form as everything else on this tab (not a separate later interview) — the score distribution below is computed live from actual responses. The June pilot data behind some other panels on this dashboard never asked these questions, which is why they're new to the RCT.</div>
+  <div class="note">A more detailed screening layer defined for the RCT survey — five probe questions that turn each anticipated barrier above into a scored (0&ndash;2) commitment signal, so screeners can prioritise rather than reject borderline youth. These questions are part of the same live Awareness/KYC intake form as everything else on this tab (not a separate later interview) — the numbers below are computed live from actual responses. The June pilot data behind some other panels on this dashboard never asked these questions, which is why they're new to the RCT.</div>
   <div class="grid" id="awareCommitmentKpi"></div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Score distribution, by criterion</h3><p>% of youth who answered this question scoring 2 / 1 / 0. Rows with no answer yet (question not reached) are excluded from the percentages.</p></div><span class="chip real">REAL</span></div>
-    <table id="awareCommitmentScoreTable"></table>
+    <div class="panel-head"><div><h3>Score by criterion</h3><p>Average score (0&ndash;2) per criterion, live from actual responses. Click a criterion for the full 2/1/0 breakdown plus its scoring rubric (screening question and what each score means).</p></div><span class="chip real">REAL</span></div>
+    <div class="grid" id="awareCommitmentCriterionCards"></div>
   </div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Overall commitment risk — eligible youth</h3><p>A single Low / Moderate / High rollup of the five criteria above, so follow-up can be prioritised without reading five separate distributions. Only counted once all five questions have a scoreable answer — everyone else shows as "Screening incomplete."</p></div><span class="chip real">REAL</span></div>
+    <div class="panel-head"><div><h3>Overall commitment risk — eligible youth</h3><p>Total score across all five criteria (out of 10): 8&ndash;10 = Low, 5&ndash;7 = Moderate, below 5 = High. Only counted once all five questions have a scoreable answer — everyone else shows as "Screening incomplete." Click a category for its gender split and a district/parish drill.</p></div><span class="chip real">REAL</span></div>
     <div class="grid" id="awareCommitmentRiskKpi"></div>
-    <table id="awareCommitmentRiskTable"></table>
-  </div>
-  <div class="panel">
-    <div class="panel-head"><div><h3>Scoring rubric, by criterion</h3><p>Source: E! Growth Data Points by Funnel Stage (Stage 1 &mdash; Awareness / KYC Intake).</p></div><span class="chip real">REAL — scoring logic</span></div>
-    <div style="overflow-x:auto;"><table id="awareCommitmentTable">
-      <tr><th>Criterion</th><th>Barrier addressed</th><th>Screening question</th><th>Score 2</th><th>Score 1</th><th>Score 0</th></tr>
-      <tr><td><b>Business Continuity</b></td><td>Business dependency</td><td>Have you ever left your business for three or more days? If yes, what arrangements did you make? If no, why? <i>(Probe: if never left, would they leave for 3+ days?)</i></td><td>Yes, I have left it before</td><td>No, but could arrange it if needed</td><td>No, I don't think I could</td></tr>
-      <tr><td><b>Attendance Plan</b></td><td>Residential format / transport cost</td><td>"If your application to attend the Educate! Growth Workshop becomes successful today" &mdash; what would you do before coming?</td><td>Named 2+ steps, OR "Nothing &mdash; I am ready"</td><td>Named exactly 1 step</td><td>No plan named, OR "I don't think I would make it"</td></tr>
-      <tr><td><b>Named Business Cover</b></td><td>Business dependency</td><td>Who would manage the business while you're away for the training?</td><td>Named person, already agreed</td><td>Someone in mind, not confirmed / would close temporarily</td><td>No one / don't have a cover</td></tr>
-      <tr><td><b>Household / Guardian Permission</b></td><td>Household / spousal permission</td><td>What would your parent, guardian, or spouse say about you being away for three days? <i>(If married, ask about spouse.)</i></td><td>They are supportive</td><td>Need a lot of convincing / not sure, haven't asked</td><td>They can't allow me</td></tr>
-      <tr><td><b>Dependents &amp; Childcare</b></td><td>Childcare / dependents</td><td>Do you have children or other dependents you look after every day? If yes, who would take care of them while you're away?</td><td>No dependents, or has a specific person</td><td>Someone helps sometimes</td><td>No one / not sure</td></tr>
-    </table></div>
+    <table id="awareCommitmentRiskGenderTable"></table>
   </div>
 
   <div class="exec-band"><span class="num">6</span><h3>Drivers for registration</h3><div class="rule"></div></div>
@@ -808,7 +800,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
       <table id="pkPermissionDistTable"></table>
     </div>
   </div>
-  <div class="note">Data source note: at registration, the only field close to this on the Acquisition tracker (<i>support_needed/parental_engagement</i>) is populated for just 4 of 307 records — not usable. This section instead uses the Baseline survey's "got permission" / "permission from whom" questions (n=134, fully populated for whether permission was needed), which is a more direct and reliable read on decision-makers than what's captured at registration.</div>
+  <div class="note">Source: Baseline survey's "got permission" / "permission from whom" questions (n=134). The Acquisition tracker's equivalent field (<i>support_needed/parental_engagement</i>) is populated for only 4 of 307 records.</div>
 
   <div class="exec-band"><span class="num">7</span><h3>Awareness vs. Baseline — eligibility comparison</h3><div class="rule"></div></div>
   <div class="note">Same 7-criteria rule, checked twice: once at Awareness intake, once again against the fuller Baseline survey. Interest and prior-training aren't re-asked at baseline, so those two show as passing by construction.</div>
@@ -816,7 +808,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
   <table id="pkAwareBaselineTable"></table>
 
   <div class="exec-band"><span class="num">8</span><h3>Persona profile — Awareness vs. Baseline</h3><div class="rule"></div></div>
-  <div class="note">Who the youth actually are at each stage, side by side — not eligibility pass/fail, but gender, age, education, and income composition. Awareness is self-reported at registration; Baseline is a separate, later interview closer to the workshop, so shifts between the two columns can reflect real change over time, recall differences, or both — not necessarily one over the other. One row per group below — click a group to drill into the full breakdown.</div>
+  <div class="note">Demographic composition at each stage — gender, age, education, income — not eligibility pass/fail. Awareness is self-reported at registration; Baseline is a later interview, so shifts can reflect real change, recall differences, or both. Click a row to drill in.</div>
   <table id="pkPersonaProfileTable"></table>
 
 </div>
@@ -827,7 +819,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <h2>Youth Questions</h2>
     <p>What youth are actually asking at registration — sourced from the Awareness form's free-text "Please ask any questions you may have at this time?" field (qna_notes), recorded verbatim by the enumerator/mobiliser. Grouped into themes below to spot patterns worth addressing at scale (e.g. in the mobiliser talking points), with the original verbatim text always one click away.</p>
   </div>
-  <div class="note"><b>How the theming works:</b> this is a hand-built keyword ruleset, not real NLP/AI — each theme has a starter list of keywords, and a question is assigned to the first theme whose keyword appears anywhere in its text. It was built 2026-08-11 with no real submissions to calibrate against yet, so treat "Other / uncategorised" as a bucket worth checking periodically rather than a dead end — it'll get refined as real questions come in.</div>
+  <div class="note"><b>How the theming works:</b> a hand-built keyword ruleset, not NLP/AI — each question is assigned to the first theme whose keyword matches. Check "Other / uncategorised" periodically as keywords get refined against real questions.</div>
 
   <div class="exec-band"><span class="num">1</span><h3>Overview</h3><div class="rule"></div></div>
   <div class="grid" id="yqKpi"></div>
@@ -885,7 +877,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
   <div class="exec-band"><span class="num">3</span><h3>Gender split</h3><div class="rule"></div></div>
   <div class="grid g2">
     <div class="panel">
-      <div class="panel-head"><div><h3>Female vs male, against 60% target</h3><p>Programme-wide — not currently broken out by call status or district in the source tracker.</p></div><span class="chip real">REAL</span></div>
+      <div class="panel-head"><div><h3>Female vs male, against 60% target</h3><p>Programme-wide; not available by call status or district.</p></div><span class="chip real">REAL</span></div>
       <canvas id="mobGenderChart"></canvas>
     </div>
     <div class="panel">
@@ -967,7 +959,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
 
   <div class="exec-band"><span class="num">2</span><h3>Attendance by district</h3><div class="rule"></div></div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Activated, present (avg) &amp; attendance rate</h3><p>Each district in this pilot maps to a single venue, so district and venue totals match.</p></div><span class="chip real">REAL</span></div>
+    <div class="panel-head"><div><h3>Activated, present (avg) &amp; attendance rate</h3><p>One venue per district in this pilot — district and venue totals match.</p></div><span class="chip real">REAL</span></div>
     <table id="attDistTable"></table>
   </div>
 
@@ -1035,7 +1027,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
 
   <div class="exec-band"><span class="num">1</span><h3>Overall target progress</h3><div class="rule"></div></div>
   <div class="progwrap">
-    <div class="panel-head" style="margin-bottom:4px;"><div><h3 style="font-family:var(--display);font-size:15px;font-weight:600;">Eligible % progress against target</h3><p style="font-size:12px;color:var(--muted);margin-top:3px;">All mobilisers combined, for the filter selected above. Target = days active &times; 25 registrations/day; progress here tracks how many of those targeted registrations turned out eligible, not just raw headcount.</p></div></div>
+    <div class="panel-head" style="margin-bottom:4px;"><div><h3 style="font-family:var(--display);font-size:15px;font-weight:600;">Eligible % progress against target</h3><p style="font-size:12px;color:var(--muted);margin-top:3px;">All mobilisers combined, for the filter selected above. Target = days active &times; 25 registrations/day; tracks the eligible share of that target, not raw headcount.</p></div></div>
     <div class="progbar-track"><div class="progbar-fill" id="mtOverallBar"></div></div>
     <div id="mtOverallText" style="font-size:12.5px;color:var(--muted);"></div>
   </div>
@@ -1045,7 +1037,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
 
   <div class="exec-band"><span class="num">3</span><h3>Programme targets — by location (master plan)</h3><div class="rule"></div></div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Eligible-interested &amp; baseline targets, cumulative to date</h3><p>All 7 locations from the master target plan. Only Iganga and Jinja have started registering; the other five show 0% until their cohorts begin. The named mobilisers are the plan's original assignments &mdash; some have since changed on the ground, so the day-by-day tracker below may show different names actually registering youth.</p></div><span class="chip real">REAL vs TARGET</span></div>
+    <div class="panel-head"><div><h3>Eligible-interested &amp; baseline targets, cumulative to date</h3><p>All 7 locations from the master target plan. Only Iganga and Jinja have started registering; the other five show 0% until their cohorts begin. Mobilisers listed are the plan's original assignments, which may differ from who's actually registering (see day-by-day tracker below).</p></div><span class="chip real">REAL vs TARGET</span></div>
     <table id="mtLocationTargetTable"></table>
   </div>
 
@@ -1071,8 +1063,8 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <p>Every eligible &amp; interested youth, by district and parish, for baseline scheduling and follow-up. Click a row to see full contact and location detail. District filter above applies here too.</p>
   </div>
 
-  <div class="note">Two fields aren't shown because they can't be reliably matched to this list: subcounty and a "preferred interview time" — both live in a different tracker (recorded during the initial phone screening call) that uses a different ID scheme with no shared key back to this eligible-youth list, so we can't join them without risking wrong matches. Village and parish are shown instead, and enumerators should confirm timing directly with the youth via the phone numbers below.</div>
-  <div class="note">This list is sourced from the programme's "Eligible youth" tracker, which only records age and education per person — both already confirmed within the current 18&ndash;30 / P7&ndash;S5 bands for all 360 people here. The other 5 criteria (interest, consent, business ownership, prior training, income) are verified on a separate tracker with no reliable shared ID back to this list, so this worklist can't be cross-checked against the fuller 7-criteria Persona KYC breakdown at the individual level — see the Persona KYC tab for that aggregate picture.</div>
+  <div class="note">Subcounty and "preferred interview time" aren't shown — both live in a separate phone-screening tracker with no shared ID to join reliably. Village and parish are shown instead; confirm timing directly with the youth.</div>
+  <div class="note">Sourced from the "Eligible youth" tracker: age and education only, both confirmed within the 18&ndash;30 / P7&ndash;S5 bands for all 360 people here. The other 5 criteria (interest, consent, business ownership, prior training, income) live on a separate tracker with no shared ID — see the Persona KYC tab for that aggregate picture.</div>
 
   <div class="globalfilters" style="position:static;margin-bottom:20px;border-radius:8px;">
     <span class="gf-label">Parish</span>
@@ -1087,7 +1079,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <input id="enumSearch" type="text" placeholder="Name or youth ID…" style="padding:7px 10px;border-radius:6px;border:1px solid #D8D2C2;font-size:13px;min-width:180px;">
   </div>
 
-  <div class="note">Baseline scheduling priority: S1–S5 candidates are called first. P7 youth remain fully eligible and stay in this tool — they're just sorted as a back-up pool, to be scheduled if S1–S5 targets aren't met. No P7 candidates are on the current "Eligible youth" tracker, so the Backup count below is 0 for now — the moment one appears live, it will sort to the bottom of the worklist automatically.</div>
+  <div class="note">Baseline scheduling priority: S1–S5 candidates are called first; P7 youth stay fully eligible, sorted as a back-up pool for if S1–S5 targets aren't met. No P7 candidates on the tracker yet, so Backup is 0.</div>
   <div class="exec-band"><span class="num">1</span><h3>Progress</h3><div class="rule"></div></div>
   <div class="grid" id="enumKpi"></div>
 
@@ -1153,6 +1145,11 @@ const DATA = {"awareness":{"registered":360,"interested":359,"consented":223,"ab
 const MOB_DAILY = [{"mobiliser": "Francis Madoi", "date": "2026-06-09", "registered": 1, "eligible": 1, "eligible_female": 1, "parishes": ["Central Division Nakavule Ward"], "districts": ["IGANGA"]}, {"mobiliser": "Francis Madoi", "date": "2026-06-10", "registered": 15, "eligible": 14, "eligible_female": 10, "parishes": ["Central Division Kasokoso Ward", "Central Division Nakavule Ward", "Northern Division Bugumba Ward", "Northern Division Mutukula Ward", "Northern Division Nkono Ward"], "districts": ["IGANGA"]}, {"mobiliser": "Francis Madoi", "date": "2026-06-11", "registered": 25, "eligible": 25, "eligible_female": 12, "parishes": ["Central Division Buligo Ward", "Central Division Nakavule Ward", "Nakigo Bulubandi", "Northern Division Bugumba Ward", "Northern Division Igamba Ward", "Northern Division Mutukula Ward", "Northern Division Nkatu Ward"], "districts": ["IGANGA"]}, {"mobiliser": "Francis Madoi", "date": "2026-06-12", "registered": 30, "eligible": 28, "eligible_female": 13, "parishes": ["Central Division Buligo Ward", "Central Division Nabidongha Prison Ward", "Northern Division Igamba Ward", "Northern Division Mutukula Ward", "Northern Division Nkatu Ward"], "districts": ["IGANGA"]}, {"mobiliser": "Francis Madoi", "date": "2026-06-18", "registered": 24, "eligible": 23, "eligible_female": 16, "parishes": ["Central Division Nakavule Ward", "Nakalama Bukaye", "Nakalama Nakalama", "Nawanyingi Magogo", "Northern Division Bugumba Ward", "Northern Division Igamba Ward", "Northern Division Mutukula Ward"], "districts": ["IGANGA", "JINJA"]}, {"mobiliser": "Francis Madoi", "date": "2026-06-19", "registered": 16, "eligible": 16, "eligible_female": 4, "parishes": ["Jinja North Division Namulesa Ward", "Northern Division Igamba Ward"], "districts": ["IGANGA", "JINJA"]}, {"mobiliser": "Francis Madoi", "date": "2026-06-20", "registered": 18, "eligible": 17, "eligible_female": 7, "parishes": ["Jinja North Division Namulesa Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kaima Andrew", "date": "2026-06-10", "registered": 22, "eligible": 22, "eligible_female": 8, "parishes": ["Jinja North Division Buwenda Tc Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kaima Andrew", "date": "2026-06-11", "registered": 22, "eligible": 22, "eligible_female": 7, "parishes": ["Jinja North Division Budhumbuli East Ward", "Jinja North Division Budhumbuli West Ward", "Jinja North Division Buwagi Kakyomya Ward", "Jinja North Division Buwekula Ward", "Jinja North Division Buwenda Tc Ward", "Jinja North Division Ivunamba Ward", "Jinja North Division Katende Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kaima Andrew", "date": "2026-06-12", "registered": 22, "eligible": 19, "eligible_female": 14, "parishes": ["Jinja North Division Katende Ward", "Jinja North Division Namulesa Ward", "Jinja North Division Wanyama Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kaima Andrew", "date": "2026-06-13", "registered": 6, "eligible": 5, "eligible_female": 5, "parishes": ["Jinja North Division Katende Ward", "Jinja North Division Wanyama Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-10", "registered": 15, "eligible": 8, "eligible_female": 5, "parishes": ["Jinja North Division Mafubira Ward", "Jinja South Division Lubaga Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-11", "registered": 20, "eligible": 20, "eligible_female": 13, "parishes": ["Jinja North Division Mafubira Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-12", "registered": 21, "eligible": 11, "eligible_female": 6, "parishes": ["Jinja North Division Budhumbuli East Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-13", "registered": 15, "eligible": 15, "eligible_female": 10, "parishes": ["Jinja North Division Budhumbuli East Ward", "Jinja North Division Wanyama Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-14", "registered": 1, "eligible": 1, "eligible_female": 0, "parishes": ["Jinja North Division Budhumbuli East Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-18", "registered": 11, "eligible": 11, "eligible_female": 6, "parishes": ["Jinja North Division Budhumbuli East Ward", "Jinja North Division Budhumbuli West Ward", "Jinja North Division Katende Ward", "Jinja North Division Wanyama Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-19", "registered": 14, "eligible": 14, "eligible_female": 10, "parishes": ["Jinja North Division Budhumbuli East Ward", "Jinja North Division Katende Ward", "Jinja North Division Wanyama Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-20", "registered": 16, "eligible": 16, "eligible_female": 7, "parishes": ["Jinja North Division Budhumbuli East Ward", "Jinja North Division Mafubira Ward", "Jinja North Division Nakanyonyi Ward"], "districts": ["JINJA"]}, {"mobiliser": "Kisakye Doreen", "date": "2026-06-23", "registered": 1, "eligible": 1, "eligible_female": 0, "parishes": ["Jinja North Division Budhumbuli East Ward"], "districts": ["JINJA"]}, {"mobiliser": "Naginda Anitah", "date": "2026-06-10", "registered": 30, "eligible": 30, "eligible_female": 14, "parishes": ["Nakalama Buseyi", "Nakigo Bulubandi"], "districts": ["IGANGA"]}, {"mobiliser": "Naginda Anitah", "date": "2026-06-11", "registered": 16, "eligible": 12, "eligible_female": 9, "parishes": ["Nakalama Bukaye", "Nakalama Buseyi", "Nakigo Bulubandi", "Nawanyingi Bunyiro", "Nawanyingi Magogo"], "districts": ["IGANGA"]}, {"mobiliser": "Naginda Anitah", "date": "2026-06-12", "registered": 25, "eligible": 22, "eligible_female": 16, "parishes": ["Nakalama Bukaye", "Nakalama Buseyi", "Nakigo Bulubandi", "Nawanyingi Magogo", "Nawanyingi Nawanyingi"], "districts": ["IGANGA"]}, {"mobiliser": "Naginda Anitah", "date": "2026-06-13", "registered": 7, "eligible": 4, "eligible_female": 2, "parishes": ["Jinja North Division Wanyama Ward", "Nakalama Buseyi", "Nakigo Bulubandi"], "districts": ["IGANGA", "JINJA"]}, {"mobiliser": "Naginda Anitah", "date": "2026-06-15", "registered": 3, "eligible": 3, "eligible_female": 3, "parishes": ["Nakigo Bulubandi"], "districts": ["IGANGA"]}];
 const MT_DAILY_TARGET = 25;
 let FILTER_MOBILISER = '';
+
+// Programme target: 85% of registered youth should convert to demographic-eligible (2026-08-11,
+// per staff clarification — the Executive Summary's "Awareness → Eligible" progress bar previously,
+// incorrectly, treated 100% of registered as the target). Single source of truth for that one row.
+const AWARENESS_ELIGIBILITY_TARGET_PCT = 0.85;
 
 /* ================= PERSONA KYC DATA ================= */
 /* Computed directly from the 394 Awareness registrations with complete
@@ -1248,6 +1245,19 @@ const DISTRICT_CODES = ['IGANGA','JINJA','LUWEERO','MASAKA','MPIGI'];
 const DISTRICT_LABEL = { IGANGA:'Iganga', JINJA:'Jinja', LUWEERO:'Luweero', MASAKA:'Masaka', MPIGI:'Mpigi' };
 function distLabel(d){ return DISTRICT_LABEL[d] || titleCase(d); }
 
+// Commitment Screening rubric text (2026-08-11) — moved out of a standalone always-visible table
+// (which duplicated the live "Score by criterion" cards below it) into a lookup consumed by
+// csDrillCriterion()'s drill panel, so the rubric only shows once you click into a specific
+// criterion. Source: E! Growth Data Points by Funnel Stage (Stage 1 — Awareness / KYC Intake).
+const COMMITMENT_LABELS_JS = { business_continuity:'Business Continuity', attendance_plan:'Attendance Plan', business_cover:'Named Business Cover', household_permission:'Household / Guardian Permission', dependents_childcare:'Dependents & Childcare' };
+const CRITERION_RUBRIC = {
+  business_continuity: { barrier:'Business dependency', question:'Have you ever left your business for three or more days? If yes, what arrangements did you make? If no, why? (Probe: if never left, would they leave for 3+ days?)', score2:'Yes, I have left it before', score1:'No, but could arrange it if needed', score0:"No, I don't think I could" },
+  attendance_plan: { barrier:'Residential format / transport cost', question:'"If your application to attend the Educate! Growth Workshop becomes successful today" — what would you do before coming?', score2:'Named 2+ steps, OR "Nothing — I am ready"', score1:'Named exactly 1 step', score0:'No plan named, OR "I don’t think I would make it"' },
+  business_cover: { barrier:'Business dependency', question:"Who would manage the business while you're away for the training?", score2:'Named person, already agreed', score1:'Someone in mind, not confirmed / would close temporarily', score0:"No one / don't have a cover" },
+  household_permission: { barrier:'Household / spousal permission', question:'What would your parent, guardian, or spouse say about you being away for three days? (If married, ask about spouse.)', score2:'They are supportive', score1:"Need a lot of convincing / not sure, haven't asked", score0:"They can't allow me" },
+  dependents_childcare: { barrier:'Childcare / dependents', question:"Do you have children or other dependents you look after every day? If yes, who would take care of them while you're away?", score2:'No dependents, or has a specific person', score1:'Someone helps sometimes', score0:'No one / not sure' },
+};
+
 /* ================= AWARENESS HELPERS ================= */
 function awareStats(district){
   const A = DATA.awareness;
@@ -1320,6 +1330,63 @@ function awareDrillKycCriterion(label, failing, total){
 // awareDrillBarrierTheme() removed 2026-08-11 — was only reachable from the "Anticipated barriers to
 // participation" chart's onClick, which has been removed. BARRIERS_THEMATIC itself is left in the
 // embedded data below (harmless, unused) rather than risk breaking the JSON literal around it.
+
+/* ---- Commitment Screening drills (2026-08-11) ---- */
+// Per-criterion drill: live 2/1/0 distribution + the scoring rubric (screening question, what each
+// score means) — folds what used to be a separate, always-visible "Scoring rubric" table (duplicating
+// the criterion list already shown in the score cards) into a click-through instead.
+function csDrillCriterion(key){
+  const c = COMMITMENT_SCREENING[key];
+  if(!c) return;
+  const rub = CRITERION_RUBRIC[key];
+  const label = c.label || COMMITMENT_LABELS_JS[key] || key;
+  esOpen(label+' — full breakdown', 'CRITERION');
+  const distRow = (score,color) => `<div class="drill-row"><span><b>Score ${score}</b>${rub?': '+rub['score'+score]:''}</span><span style="color:${color}"><b>${fmt(c.dist[score])}</b> (${pctTxt(c.dist[score],c.scored)})</span></div>`;
+  document.getElementById('drillBody').innerHTML = `
+    <div class="dpanel"><h4>Live score distribution</h4>
+      ${distRow('2','var(--green)')}
+      ${distRow('1','#A87A1E')}
+      ${distRow('0','var(--coral)')}
+      <div class="drill-row"><span>Answered</span><span>${fmt(c.scored)} of ${fmt(c.scored+c.unscored)}</span></div>
+      <div class="drill-row"><span>Average score</span><span><b>${c.avg!=null?c.avg.toFixed(2):'—'}</b> / 2</span></div>
+    </div>
+    ${rub ? `<div class="dpanel"><h4>Scoring rubric</h4><p class="drill-note" style="margin-bottom:8px;"><b>Barrier addressed:</b> ${rub.barrier}</p><p class="drill-note">${rub.question}</p></div>` : ''}
+    <p class="drill-note">Source: E! Growth Data Points by Funnel Stage (Stage 1 — Awareness / KYC Intake).</p>`;
+}
+
+// Commitment-risk category drill: gender split + district list (click a district to drill to parish).
+// Replaces a second always-visible table that repeated the same Low/Moderate/High/Incomplete numbers
+// already shown on the KPI cards.
+const CR_CAT_LABEL = { low:'Low risk', moderate:'Moderate risk', high:'High risk', incomplete:'Screening incomplete' };
+function crDrillCategory(cat){
+  const risk = COMMITMENT_SCREENING.risk;
+  if(!risk) return;
+  esOpen(CR_CAT_LABEL[cat]+' — by gender & district', 'RISK CATEGORY');
+  const bg = risk.by_gender || {};
+  const genderRows = ['female','male'].map(g=>{
+    const gg = bg[g] || { total:0 };
+    const n = gg[cat] || 0;
+    return `<div class="drill-row"><span>${g==='female'?'Female':'Male'}</span><span><b>${fmt(n)}</b> (${pctTxt(n,gg.total)})</span></div>`;
+  }).join('');
+  const bd = risk.by_district || {};
+  const distRows = DISTRICT_CODES.map(d=>{
+    const raw = rawDistrict(d);
+    const dd = bd[raw] || { total:0 };
+    const n = dd[cat] || 0;
+    return `<div class="drill-row kpi-clickable" onclick="crDrillCategoryParish('${cat}','${raw}')"><span><b>${distLabel(d)}</b> ›</span><span>${fmt(n)} (${pctTxt(n,dd.total)})</span></div>`;
+  }).join('');
+  document.getElementById('drillBody').innerHTML = `
+    <div class="dpanel"><h4>By gender</h4>${genderRows}</div>
+    <div class="dpanel"><h4>By district</h4>${distRows}</div>`;
+}
+function crDrillCategoryParish(cat, d){
+  const risk = COMMITMENT_SCREENING.risk;
+  if(!risk) return;
+  esOpen(CR_CAT_LABEL[cat]+' — '+humanizeLoc(d)+' by parish', 'PARISH');
+  const parishes = (risk.by_parish && risk.by_parish[d]) || {};
+  const rows = Object.entries(parishes).map(([p,v])=>`<div class="drill-row"><span><b>${p}</b></span><span>${fmt(v[cat]||0)} (${pctTxt(v[cat]||0, v.total)})</span></div>`).join('');
+  document.getElementById('drillBody').innerHTML = `<div style="margin-bottom:10px"><span class="glink" onclick="crDrillCategory('${cat}')">‹ Back</span></div><div class="dpanel"><h4>Parish breakdown</h4>${rows||'<p class="drill-note">No parish data.</p>'}</div>`;
+}
 
 /* ---- Mobilisation: district -> venue ---- */
 function mobDrillDistricts(){
@@ -1417,7 +1484,7 @@ function renderExec(){
   // ---- 2: progress on target ----
   // Mobilisation/Acquisition rows muted — see note above cards[].
   const targets = [
-    { label:'Awareness → Eligible', value: A.eligible_demographic, target: A.registered, note: 'target: 100% of registered are eligible', live:true },
+    { label:'Awareness → Eligible', value: A.eligible_demographic, target: Math.round(A.registered * AWARENESS_ELIGIBILITY_TARGET_PCT), note: `target: ${(AWARENESS_ELIGIBILITY_TARGET_PCT*100).toFixed(0)}% of registered are eligible`, live:true },
     { label:'Mobilisation confirm rate', value: 0, target: 0, note: 'Mobilisation not live yet', live:false },
     { label:'Acquisition (verified)', value: 0, target: 0, note: 'Acquisition not live yet', live:false },
   ];
@@ -1624,7 +1691,7 @@ function computeKycBottleneck(P, labels){
 function renderAwareness(){
   const A = DATA.awareness;
   const P = PERSONA_KYC[rawDistrict(FILTER_DISTRICT)] || PERSONA_KYC[''];
-  document.getElementById('awareEligNote').innerHTML = `<b>Eligibility rule:</b> ${A.eligibility_rule}. ${fmt(A.eligible_demographic)} of ${fmt(A.registered)} registrants qualify at intake (${pctTxt(A.eligible_demographic, A.registered)}) — the registration form enforces these fields as gating questions, so this "Eligible" figure reflects the intake-level gate. The Persona KYC tab shows the fuller, verification-level breakdown (${fmt(P.eligibility_overall.female.pass+P.eligibility_overall.male.pass)} of ${fmt(P.total)} pass all 7 criteria on closer review). See the bottleneck breakdown below for which criterion blocks the most youth.`;
+  document.getElementById('awareEligNote').innerHTML = `<b>Eligibility rule:</b> ${A.eligibility_rule}. ${fmt(A.eligible_demographic)} of ${fmt(A.registered)} registrants qualify at intake (${pctTxt(A.eligible_demographic, A.registered)}). Persona KYC tab: fuller verification-level breakdown (${fmt(P.eligibility_overall.female.pass+P.eligibility_overall.male.pass)} of ${fmt(P.total)} pass all 7 criteria).`;
   document.getElementById('awareEligRuleP').textContent = A.eligibility_rule + '.';
 
   const totElT = DIVISION_TARGETS.reduce((s,d)=>s+d.eligible_target,0);
@@ -1678,45 +1745,47 @@ function renderAwareness(){
       { label:'Average score, all criteria', value: isFinite(csAvgAll)?csAvgAll.toFixed(2)+' / 2':'—', sub:'Higher = more ready to commit' },
     ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
 
-    document.getElementById('awareCommitmentScoreTable').innerHTML = `<tr><th>Criterion</th><th>Score 2</th><th>Score 1</th><th>Score 0</th><th>Avg score</th><th>Answered</th></tr>` +
-      csKeys.map(k=>{
-        const c = COMMITMENT_SCREENING[k];
-        if(!c || !c.scored) return `<tr><td><b>${k}</b></td><td colspan="5" style="color:var(--muted)">No answers yet.</td></tr>`;
-        return `<tr><td><b>${c.label}</b></td><td>${fmt(c.dist['2'])} (${pctTxt(c.dist['2'],c.scored)})</td><td>${fmt(c.dist['1'])} (${pctTxt(c.dist['1'],c.scored)})</td><td>${fmt(c.dist['0'])} (${pctTxt(c.dist['0'],c.scored)})</td><td><b>${c.avg!=null?c.avg.toFixed(2):'—'}</b></td><td>${fmt(c.scored)} of ${fmt(c.scored+c.unscored)}</td></tr>`;
-      }).join('');
+    document.getElementById('awareCommitmentCriterionCards').innerHTML = csKeys.map(k=>{
+      const c = COMMITMENT_SCREENING[k];
+      const label = (c && c.label) || COMMITMENT_LABELS_JS[k] || k;
+      if(!c || !c.scored) return `<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NO DATA</span><div class="label">${label}</div><div class="value">—</div><div class="sub">No answers yet</div></div>`;
+      return `<div class="card kpi-clickable" onclick="csDrillCriterion('${k}')"><span class="tag">REAL</span><div class="label">${label} ›</div><div class="value">${c.avg!=null?c.avg.toFixed(2):'—'} / 2</div><div class="sub">${fmt(c.dist['2'])} of ${fmt(c.scored)} scored 2 (${pctTxt(c.dist['2'],c.scored)})</div></div>`;
+    }).join('');
 
-    // Overall commitment risk (2026-08-11) — Low/Moderate/High rollup for ELIGIBLE registrants,
-    // from Code.gs's buildCommitmentRisk(). Not district-filterable yet (same as the criterion
-    // table above — Code.gs computes it over all rows, no by_district breakdown built).
+    // Overall commitment risk (2026-08-11) — Low/Moderate/High/Incomplete rollup for ELIGIBLE
+    // registrants, from Code.gs's buildCommitmentRisk(). Gender split shown inline; district/parish
+    // breakdown lives behind the click-through drill (crDrillCategory / crDrillCategoryParish) —
+    // this replaces a second always-visible table that just repeated these same 4 numbers.
     const risk = COMMITMENT_SCREENING.risk;
     if (risk && risk.total_eligible) {
-      const riskCard = (label, n, tag, color) => `<div class="card"><span class="tag" style="background:${color}22;color:${color};">${tag}</span><div class="label">${label}</div><div class="value">${fmt(n)}</div><div class="sub">${pctTxt(n, risk.total_eligible)} of eligible</div></div>`;
+      const riskCard = (label, n, tag, color, cat) => `<div class="card kpi-clickable" onclick="crDrillCategory('${cat}')"><span class="tag" style="background:${color}22;color:${color};">${tag} ›</span><div class="label">${label}</div><div class="value">${fmt(n)}</div><div class="sub">${pctTxt(n, risk.total_eligible)} of eligible</div></div>`;
       document.getElementById('awareCommitmentRiskKpi').innerHTML =
-        riskCard('Low risk — ready & prepared', risk.low, 'LOW', 'var(--green)') +
-        riskCard('Moderate risk — minor barriers', risk.moderate, 'MODERATE', '#A87A1E') +
-        riskCard('High risk — significant barriers', risk.high, 'HIGH', 'var(--coral)') +
-        `<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">INCOMPLETE</span><div class="label">Screening incomplete</div><div class="value">${fmt(risk.incomplete)}</div><div class="sub">${pctTxt(risk.incomplete, risk.total_eligible)} of eligible — not all 5 questions answered yet</div></div>`;
-      document.getElementById('awareCommitmentRiskTable').innerHTML = `<tr><th>Category</th><th>Definition</th><th># Eligible youth</th><th>% of eligible</th></tr>
-        <tr><td><b style="color:var(--green)">Low</b></td><td>Total commitment score 8–10 out of 10 (sum of all 5 criteria, each scored 0–2) — strong business continuity, confirmed cover, household support, and childcare in place.</td><td>${fmt(risk.low)}</td><td>${pctTxt(risk.low,risk.total_eligible)}</td></tr>
-        <tr><td><b style="color:#A87A1E">Moderate</b></td><td>Total commitment score 5–7 out of 10 — has plans but some details are unconfirmed (e.g. household still needs convincing, business cover unconfirmed); needs follow-up before the workshop date.</td><td>${fmt(risk.moderate)}</td><td>${pctTxt(risk.moderate,risk.total_eligible)}</td></tr>
-        <tr><td><b style="color:var(--coral)">High</b></td><td>Total commitment score below 5 out of 10 — major logistical, business-dependency, or permission obstacles. Flagged for intervention; resolving the barrier(s) is needed to guarantee attendance.</td><td>${fmt(risk.high)}</td><td>${pctTxt(risk.high,risk.total_eligible)}</td></tr>
-        <tr><td><b style="color:var(--muted)">Screening incomplete</b></td><td>Hasn't yet answered all 5 Commitment Screening questions — not categorised rather than guessed at.</td><td>${fmt(risk.incomplete)}</td><td>${pctTxt(risk.incomplete,risk.total_eligible)}</td></tr>`;
+        riskCard('Low risk — ready & prepared', risk.low, 'LOW', 'var(--green)', 'low') +
+        riskCard('Moderate risk — minor barriers', risk.moderate, 'MODERATE', '#A87A1E', 'moderate') +
+        riskCard('High risk — significant barriers', risk.high, 'HIGH', 'var(--coral)', 'high') +
+        `<div class="card kpi-clickable" onclick="crDrillCategory('incomplete')"><span class="tag" style="background:#EFEAE0;color:var(--muted);">INCOMPLETE ›</span><div class="label">Screening incomplete</div><div class="value">${fmt(risk.incomplete)}</div><div class="sub">${pctTxt(risk.incomplete, risk.total_eligible)} of eligible</div></div>`;
+
+      const bg = risk.by_gender || {};
+      const genderRow = (g,label) => {
+        const gg = bg[g] || {low:0,moderate:0,high:0,incomplete:0,total:0};
+        return `<tr><td><b>${label}</b></td><td>${fmt(gg.low)} (${pctTxt(gg.low,gg.total)})</td><td>${fmt(gg.moderate)} (${pctTxt(gg.moderate,gg.total)})</td><td>${fmt(gg.high)} (${pctTxt(gg.high,gg.total)})</td><td>${fmt(gg.incomplete)} (${pctTxt(gg.incomplete,gg.total)})</td></tr>`;
+      };
+      document.getElementById('awareCommitmentRiskGenderTable').innerHTML = `<tr><th>Gender</th><th>Low</th><th>Moderate</th><th>High</th><th>Incomplete</th></tr>${genderRow('female','Female')}${genderRow('male','Male')}`;
     } else {
       document.getElementById('awareCommitmentRiskKpi').innerHTML = ['Low risk','Moderate risk','High risk','Screening incomplete']
         .map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">AWAITING DATA</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
-      document.getElementById('awareCommitmentRiskTable').innerHTML = `<tr><th>Category</th><th>Definition</th><th># Eligible youth</th><th>% of eligible</th></tr>
-        <tr><td colspan="4" style="color:var(--muted);text-align:center;padding:14px;">No eligible registrants with a complete Commitment Screening yet.</td></tr>`;
+      document.getElementById('awareCommitmentRiskGenderTable').innerHTML = `<tr><th>Gender</th><th>Low</th><th>Moderate</th><th>High</th><th>Incomplete</th></tr>
+        <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px;">No eligible registrants with a complete Commitment Screening yet.</td></tr>`;
     }
   } else {
     document.getElementById('awareCommitmentKpi').innerHTML = [
       'Responses scored so far', 'Average score, all criteria',
     ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">AWAITING DATA</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
-    document.getElementById('awareCommitmentScoreTable').innerHTML = `<tr><th>Criterion</th><th>Score 2</th><th>Score 1</th><th>Score 0</th><th>Avg score</th><th>Answered</th></tr>
-      <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:14px;">No Commitment Screening answers in the data yet — this is a live calculation, it'll populate as RCT submissions come in.</td></tr>`;
+    document.getElementById('awareCommitmentCriterionCards').innerHTML = csKeys.map(k=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">AWAITING DATA</span><div class="label">${COMMITMENT_LABELS_JS[k]||k}</div><div class="value">—</div></div>`).join('');
     document.getElementById('awareCommitmentRiskKpi').innerHTML = ['Low risk','Moderate risk','High risk','Screening incomplete']
       .map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">AWAITING DATA</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
-    document.getElementById('awareCommitmentRiskTable').innerHTML = `<tr><th>Category</th><th>Definition</th><th># Eligible youth</th><th>% of eligible</th></tr>
-      <tr><td colspan="4" style="color:var(--muted);text-align:center;padding:14px;">No Commitment Screening answers in the data yet.</td></tr>`;
+    document.getElementById('awareCommitmentRiskGenderTable').innerHTML = `<tr><th>Gender</th><th>Low</th><th>Moderate</th><th>High</th><th>Incomplete</th></tr>
+      <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px;">No Commitment Screening answers in the data yet.</td></tr>`;
   }
 
   // "Anticipated barriers to participation" chart (awareBarriersNote/awareBarriersChart) removed
@@ -2807,8 +2876,15 @@ document.getElementById('gfReset').addEventListener('click', ()=>{
    password prompt. Use the Logout button to clear it. Since the gate was
    already cosmetic (see above — the data downloads regardless of password),
    remembering the role for longer doesn't change what's actually protected.
-   Change all three passwords below before sharing this link. */
+   Change all four passwords below before sharing this link.
+
+   ROLES (2026-08-11: added 'admin'): 'staff' (Growth2026) sees everything
+   EXCEPT the Enumerator Worklist group tab (youth names/phone numbers) —
+   hidden via the body.role-staff CSS rule below. 'admin' (new) sees
+   everything 'staff' does, PLUS the Enumerator Worklist. 'mobiliser' and
+   'enumerator' are unchanged, each locked to their own single tab. */
 const STAFF_PASSWORD = 'Growth2026';
+const ADMIN_PASSWORD = 'Admin2026';
 const MOBILISER_PASSWORD = 'Mobiliser2026';
 const ENUMERATOR_PASSWORD = 'Enumerator2026';
 
@@ -2958,7 +3034,7 @@ function egwUpdateLiveBadge(){
 }
 
 function egwApplyRole(role){
-  document.body.classList.remove('role-staff','role-mobiliser','role-enumerator');
+  document.body.classList.remove('role-staff','role-admin','role-mobiliser','role-enumerator');
   document.getElementById('loginGate').style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
   egwUpdateLiveBadge();
@@ -2976,6 +3052,11 @@ function egwApplyRole(role){
     document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
     document.getElementById('view-enum-worklist').classList.add('active');
     renderEnumerator();
+  } else if(role === 'admin'){
+    // Full access, same as 'staff' below, PLUS the Enumerator Worklist group tab (not hidden by
+    // any body.role-admin CSS rule — see the ACCESS CONTROL comment above STAFF_PASSWORD).
+    document.body.classList.add('role-admin');
+    renderExec();
   } else {
     document.body.classList.add('role-staff');
     renderExec();
@@ -2994,7 +3075,8 @@ function egwLogout(){
 async function egwTryLogin(){
   const val = document.getElementById('loginPassword').value;
   let role = null;
-  if(val === STAFF_PASSWORD) role = 'staff';
+  if(val === ADMIN_PASSWORD) role = 'admin';
+  else if(val === STAFF_PASSWORD) role = 'staff';
   else if(val === MOBILISER_PASSWORD) role = 'mobiliser';
   else if(val === ENUMERATOR_PASSWORD) role = 'enumerator';
   if(!role){
@@ -3099,7 +3181,7 @@ egwBlankLiveDomain();
 
 /* ================= BOOTSTRAP ================= */
 const existingRole = localStorage.getItem('egw_role');
-if(existingRole === 'staff' || existingRole === 'mobiliser' || existingRole === 'enumerator'){
+if(existingRole === 'staff' || existingRole === 'admin' || existingRole === 'mobiliser' || existingRole === 'enumerator'){
   // Same speed pattern as egwTryLogin(): reveal instantly from cache/snapshot,
   // then fetch fresh data in the background.
   egwApplyCachedLiveData();

@@ -578,7 +578,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
 
   <div class="exec-band"><span class="num">5</span><h3>Overall recruitment funnel</h3><div class="rule"></div></div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Registered → Eligible → Interested → Mobilised → Reached → Confirmed → Acquired</h3><p>Each stage shows count, % of the previous stage, and youth lost. The largest single drop-off is flagged automatically. Click a stage to drill by district.</p></div><span class="chip real">REAL endpoints</span></div>
+    <div class="panel-head"><div><h3>Registered → Interested → Eligible → Baselined</h3><p>Each stage shows count, % of the previous stage, and youth lost. The largest single drop-off is flagged automatically. Click a stage to drill by district. Mobilisation/Acquisition stages (Mobilised → Reached → Confirmed → Acquired) are muted below, pending go-live wiring.</p></div><span class="chip real">REAL endpoints</span></div>
     <div class="funnel" id="execFunnel"></div>
     <p style="font-size:11.5px;color:var(--muted);margin-top:10px;">Mobilised comes from a separate call-tracker form, not a strict subset of Interested (see Guide).</p>
   </div>
@@ -591,8 +591,9 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
 
   <div class="exec-band"><span class="num">7</span><h3>Eligibility barriers</h3><div class="rule"></div></div>
   <div class="panel">
-    <div class="panel-head"><div><h3>Why registrants didn't qualify</h3><p>Reasons a registrant did not pass into demographic-eligible. See the Awareness tab for the criterion-by-criterion KYC screening bottleneck.</p></div><span class="chip real">REAL</span></div>
+    <div class="panel-head"><div><h3>All 7 eligibility criteria, in screening order</h3><p>Each criterion is counted only among registrants who actually reached that question — Kobo only asks consent once someone says yes to interest, and only asks the demographic/business questions once both interest and consent are yes. So one "no" on interest isn't also counted as a fail on age, education, income, etc. — see note below the table.</p></div><span class="chip real">REAL</span></div>
     <table id="execBarriersTable"></table>
+    <p class="note" id="execBarriersNote" style="margin-top:8px;"></p>
   </div>
 
   <div class="exec-band"><span class="num">8</span><h3>Gender disaggregation across the funnel</h3><div class="rule"></div></div>
@@ -1337,7 +1338,12 @@ function awareDrillKycCriterion(label, failing, total){
   // LIVE (2026-08-11): tightened_kyc is fired straight from the Awareness sheet
   // (Code.gs's buildTightenedKyc()); falls back to the old snapshot only if the
   // live field hasn't arrived yet (e.g. Code.gs not yet redeployed).
-  const src = (DATA.awareness.tightened_kyc && DATA.awareness.tightened_kyc.total) ? DATA.awareness.tightened_kyc : AWARE_KYC_ALT;
+  // District-scoped (2026-08-12): uses the same tightened_kyc_by_district lookup as the table this
+  // drill opens from (awareKycTable) — must stay in sync or the drill would show different numbers
+  // than the row you clicked.
+  const A = DATA.awareness;
+  const tk = A.tightened_kyc_by_district ? A.tightened_kyc_by_district[rawDistrict(FILTER_DISTRICT)] : A.tightened_kyc;
+  const src = (tk && tk.total) ? tk : AWARE_KYC_ALT;
   const c = src.criteria[key];
   esOpen(label, 'KYC CRITERION');
   const genderRow = (g,label2) => { const cc=c[g]; const fail=cc.total-cc.pass; return `<div class="drill-row"><span>${label2}</span><span><b>${fmt(cc.pass)}</b> pass · <b style="color:var(--coral)">${fmt(fail)}</b> fail (of ${fmt(cc.total)})</span></div>`; };
@@ -1480,13 +1486,23 @@ function simpleDrill(title, tag, rowsHtml){
 /* ================= EXECUTIVE SUMMARY ================= */
 function renderExec(){
   const A = DATA.awareness, M = DATA.mobilisation, AR = DATA.arrival;
+  // District-scoped registered/eligible (2026-08-11 fix): this whole function used to read A.registered
+  // / A.eligible_demographic directly, which are always programme-wide totals — so the district filter
+  // dropdown had no effect anywhere on this tab (cards, progress-on-target bars/table all stayed at the
+  // "All districts" numbers no matter what was selected). awareStats() already existed and does this
+  // correctly (Mobiliser Tracker has used it since it was written) — it just was never wired in here.
+  // NOTE: "interested" isn't captured per-district in the source tracker (see execDistFunnelTable's own
+  // note), so AS only has registered/eligible/femPct when a district is selected — the funnel below
+  // (which needs "interested") intentionally stays programme-wide even when filtered; see its own note.
+  const AS = awareStats(FILTER_DISTRICT);
+  const distSuffix = FILTER_DISTRICT ? ` — ${titleCase(FILTER_DISTRICT)}` : '';
 
   // ---- 1: conversion KPI cards ----
   // Mobilisation/Acquisition are muted (not yet wired to live data) — reset to blank per
   // go-live decision (2026-08-11): we don't show demo/test numbers on the live dashboard.
   const cards = [
-    { label:'Registered', value: fmt(A.registered), sub:'Awareness intake', live:true, drill:()=>awareDrillDistricts() },
-    { label:'Eligible', value: fmt(A.eligible_demographic), sub: pctTxt(A.eligible_demographic, A.registered)+' of registered', live:true, drill:()=>simpleDrill('Eligible','AWARENESS',`<div class="drill-row"><span>Eligible</span><span><b>${fmt(A.eligible_demographic)}</b></span></div><div class="drill-row"><span>Not eligible</span><span><b>${fmt(A.registered-A.eligible_demographic)}</b></span></div>`) },
+    { label:'Registered', value: fmt(AS.registered), sub:'Awareness intake'+distSuffix, live:true, drill:()=>awareDrillDistricts() },
+    { label:'Eligible', value: fmt(AS.eligible), sub: (AS.registered?pctTxt(AS.eligible, AS.registered)+' of registered':'—')+distSuffix, live:true, drill:()=>simpleDrill('Eligible','AWARENESS',`<div class="drill-row"><span>Eligible</span><span><b>${fmt(AS.eligible)}</b></span></div><div class="drill-row"><span>Not eligible</span><span><b>${fmt(AS.registered-AS.eligible)}</b></span></div>`) },
     { label:'Confirmed to attend', value:'—', sub:'Mobilisation not live yet', live:false, drill:()=>{} },
     { label:'Acquired (verified)', value:'—', sub:'Acquisition not live yet', live:false, drill:()=>{} },
   ];
@@ -1502,8 +1518,11 @@ function renderExec(){
 
   // ---- 2: progress on target ----
   // Mobilisation/Acquisition rows muted — see note above cards[].
+  // District-scoped (2026-08-11 fix, see AS above) — this is the row that was showing an inflated
+  // "target" when a district filter was selected: it was computing 85% of the PROGRAMME-WIDE
+  // registered count (all districts combined) no matter which single district was chosen.
   const targets = [
-    { label:'Awareness → Eligible', value: A.eligible_demographic, target: Math.round(A.registered * AWARENESS_ELIGIBILITY_TARGET_PCT), note: `target: ${(AWARENESS_ELIGIBILITY_TARGET_PCT*100).toFixed(0)}% of registered are eligible`, live:true },
+    { label:'Awareness → Eligible', value: AS.eligible, target: Math.round(AS.registered * AWARENESS_ELIGIBILITY_TARGET_PCT), note: `target: ${(AWARENESS_ELIGIBILITY_TARGET_PCT*100).toFixed(0)}% of registered are eligible${distSuffix}`, live:true },
     { label:'Mobilisation confirm rate', value: 0, target: 0, note: 'Mobilisation not live yet', live:false },
     { label:'Acquisition (verified)', value: 0, target: 0, note: 'Acquisition not live yet', live:false },
   ];
@@ -1586,16 +1605,26 @@ function renderExec(){
   // ---- 3: funnel ----
   // Mobilised/Reached/Confirmed/Acquired stages removed — Mobilisation/Acquisition muted
   // pending go-live wiring (2026-08-11); funnel now stops at Awareness (the only live domain).
+  // "Baselined" added 2026-08-12 (per request — it's part of the funnel, belongs right after
+  // Eligible) — sourced from BASELINE_TRACKING.baselined, which (unlike A.baselined_all) only ever
+  // counts baselined status among the ELIGIBLE subset, so it's a true funnel stage (a subset of
+  // "Eligible", not a separate all-registrants count that could exceed it).
+  // Kept programme-wide, same as Registered/Interested/Eligible in this funnel: BASELINE_TRACKING.by_district
+  // exists and could scope it, but "Interested" can't be scoped (not tracked per-district), so
+  // filtering only Baselined would put one small district-scoped bar next to three much bigger
+  // programme-wide ones — misleading in the opposite direction. Use the district filter on the
+  // Awareness tab's own Baseline Tracking section (or Mobiliser Tracker) for a scoped view.
   const stages = [
     ['Registered', A.registered, true],
     ['Interested', A.interested, true],
     ['Eligible', A.eligible_demographic, true],
+    ['Baselined', BASELINE_TRACKING.baselined, true],
   ];
   const vals = stages.map(s=>s[1]);
   let worstIdx=1, worstLost=-1;
   for(let i=1;i<vals.length;i++){ const lost=vals[i-1]-vals[i]; if(lost>worstLost){worstLost=lost;worstIdx=i;} }
   const maxV = vals[0];
-  const drillFns = [awareDrillDistricts, awareDrillDistricts, awareDrillDistricts];
+  const drillFns = [awareDrillDistricts, awareDrillDistricts, awareDrillDistricts, awareDrillDistricts];
   document.getElementById('execFunnel').innerHTML = stages.map((s,i)=>{
     const [label,v] = s;
     const prev = i===0?v:vals[i-1];
@@ -1603,17 +1632,36 @@ function renderExec(){
     const worst = i===worstIdx;
     const meta = i===0 ? 'Top of funnel' : `<b>${pctTxt(v,prev)}</b> of previous · <span class="funnel-drop" style="color:var(--coral)">${fmt(Math.max(0,lost))} lost</span>`;
     return `<div class="funnel-row ${worst?'worst':''}" data-idx="${i}"><div class="funnel-stage">${label} <span style="color:var(--green);font-weight:700;font-size:9px;">● REAL</span></div><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${Math.max(6,pct(v,maxV))}%;background:${PALETTE[i%PALETTE.length]}">${fmt(v)}</div></div><div class="funnel-meta">${meta}${worst?'<span class="worst-flag">BIGGEST DROP-OFF</span>':''}</div></div>`;
-  }).join('') + `<div style="color:var(--muted);font-size:11px;margin-top:8px;padding-top:8px;border-top:1px dashed #E4DFD3;">Mobilisation and Acquisition stages are muted while going live — hidden until wired to real data.</div>`;
+  }).join('') + `<div style="color:var(--muted);font-size:11px;margin-top:8px;padding-top:8px;border-top:1px dashed #E4DFD3;">Mobilisation and Acquisition stages are muted while going live — hidden until wired to real data.${FILTER_DISTRICT?' This funnel stays programme-wide (all districts) even with a district filter selected — "Interested" isn\'t tracked per-district in the source data, so a partially-filtered funnel would be misleading. Use the by-district table above for a district breakdown of Registered/Eligible, or the Baseline Tracking section below for a scoped Baselined figure.':''}</div>`;
   Array.from(document.getElementById('execFunnel').children).forEach((el,i)=>{ if(!drillFns[i]) return; el.style.cursor='pointer'; el.onclick = drillFns[i]; });
 
   // ---- 5: attrition through funnel ----
+  // Same programme-wide-only caveat as the funnel above (Interested isn't tracked per-district).
   document.getElementById('execAttritionTable').innerHTML = `<tr><th>Stage</th><th>Count</th><th>% of Registered</th></tr>` +
-    stages.map(([label,v])=>`<tr><td><b>${label}</b></td><td>${fmt(v)}</td><td>${pctTxt(v, stages[0][1])}</td></tr>`).join('');
+    stages.map(([label,v])=>`<tr><td><b>${label}</b></td><td>${fmt(v)}</td><td>${pctTxt(v, stages[0][1])}</td></tr>`).join('') +
+    (FILTER_DISTRICT ? `<tr><td colspan="3" style="color:var(--muted);font-size:11px;">Programme-wide (all districts) — see note above.</td></tr>` : '');
 
-  // ---- 6: eligibility barriers ----
-  const barrierLabels = { no_consent:'Withdrew / did not proceed', not_interested:'Not interested', cannot_attend:'Cannot attend' };
-  document.getElementById('execBarriersTable').innerHTML = `<tr><th>Barrier</th><th>Count</th></tr>` +
-    Object.entries(A.ineligibility_reasons||{}).map(([k,v])=>`<tr><td><b>${barrierLabels[k]||titleCase(k)}</b></td><td>${fmt(v)}</td></tr>`).join('');
+  // ---- 6: eligibility barriers — all 7 criteria, sequential denominators (2026-08-11) ----
+  // Live via Code.gs's buildEligibilityBarriers() — see the long comment above that function for why
+  // this exists (in short: "interest" showing 0 failures earlier wasn't a bug — nobody had actually
+  // answered "no" yet in the live data — but the OTHER per-criterion tables on this dashboard
+  // (Persona KYC, Awareness KYC bottleneck) gate on gender being present, which would silently hide
+  // future interest/consent failures forever, since gender is only asked after both are "yes". This
+  // table doesn't have that gap.)
+  const EB = A.eligibility_barriers;
+  if (EB && EB.criteria) {
+    document.getElementById('execBarriersTable').innerHTML = `<tr><th>Criterion</th><th># Failing</th><th>of</th><th>% Failing</th></tr>` +
+      EB.order.map(k=>{
+        const c = EB.criteria[k];
+        const pctFail = c.total ? +(c.fail/c.total*100).toFixed(1) : 0;
+        return `<tr class="kpi-clickable" onclick="execDrillBarrier('${k}')"><td><b>${c.label}</b> ›</td><td style="color:${c.fail>0?'var(--coral)':'inherit'}">${fmt(c.fail)}</td><td>${fmt(c.total)} who reached this question</td><td>${pctFail}%</td></tr>`;
+      }).join('');
+    document.getElementById('execBarriersNote').textContent = `${fmt(EB.registered)} registered in total` + (EB.in_progress ? `, of which ${fmt(EB.in_progress)} ${EB.in_progress===1?'is':'are'} still mid-submission (haven't answered the interest question yet — excluded from every row above until they do).` : '.') + ` ${fmt(EB.reached_demographics)} passed both interest and consent, so that's the denominator for age, education, business ownership, prior training, and income.` + (FILTER_DISTRICT ? ` Programme-wide (all districts) — Code.gs doesn't currently break this down by district.` : '');
+  } else {
+    document.getElementById('execBarriersTable').innerHTML = `<tr><th>Criterion</th><th># Failing</th><th>of</th><th>% Failing</th></tr>
+      <tr><td colspan="4" style="color:var(--muted);text-align:center;padding:14px;">Awaiting live data — redeploy the updated Code.gs to enable.</td></tr>`;
+    document.getElementById('execBarriersNote').textContent = '';
+  }
 
   // ---- 7: gender across the funnel — chart + table ----
   // Mobilised/Acquired rows removed — Mobilisation/Acquisition muted pending go-live wiring.
@@ -1707,10 +1755,41 @@ function computeKycBottleneck(P, labels){
   return rows;
 }
 
+// Executive Summary "Eligibility barriers" drill (2026-08-11) — one row per criterion, opened from
+// execBarriersTable. Unlike awareDrillKycCriterion() (which splits by gender), A.eligibility_barriers
+// isn't gender-split — it's built to catch everyone, including anyone who never reached the gender
+// question (see the long comment on Code.gs's buildEligibilityBarriers()) — so this drill just shows
+// the raw pass/fail/total for that one criterion plus where it sits in the screening sequence.
+function execDrillBarrier(key){
+  const EB = DATA.awareness.eligibility_barriers;
+  const c = EB.criteria[key];
+  const idx = EB.order.indexOf(key);
+  esOpen(c.label, 'ELIGIBILITY CRITERION');
+  const stageNote = idx === 0
+    ? `This is the first screening question — every registrant who has answered it (yes or no) is counted.`
+    : idx === 1
+    ? `Only asked of registrants who answered "yes" to ${EB.criteria[EB.order[0]].label.toLowerCase()} — that's why the denominator (${fmt(c.total)}) is smaller than the ${fmt(EB.registered)} total registered.`
+    : `Only asked once a registrant has passed both interest and consent — denominator is ${fmt(c.total)} (of ${fmt(EB.registered)} total registered).`;
+  document.getElementById('drillBody').innerHTML = `
+    <div class="dpanel"><h4>Pass / fail</h4>
+      <div class="drill-row"><span>Pass</span><span><b style="color:var(--green)">${fmt(c.pass)}</b></span></div>
+      <div class="drill-row"><span>Fail</span><span><b style="color:var(--coral)">${fmt(c.fail)}</b></span></div>
+      <div class="drill-row"><span>Of</span><span><b>${fmt(c.total)}</b> who reached this question</span></div>
+    </div>
+    <p class="drill-note">${stageNote}</p>`;
+}
+
 function renderAwareness(){
   const A = DATA.awareness;
   const P = PERSONA_KYC[rawDistrict(FILTER_DISTRICT)] || PERSONA_KYC[''];
-  document.getElementById('awareEligNote').innerHTML = `<b>Eligibility rule:</b> ${A.eligibility_rule}. ${fmt(A.eligible_demographic)} of ${fmt(A.registered)} registrants qualify at intake (${pctTxt(A.eligible_demographic, A.registered)}). Persona KYC tab: fuller verification-level breakdown (${fmt(P.eligibility_overall.female.pass+P.eligibility_overall.male.pass)} of ${fmt(P.total)} pass all 7 criteria).`;
+  // District-scoped registered/eligible (2026-08-11 fix, same root cause as the Executive Summary fix
+  // above): this tab's own headline cards read A.registered/A.eligible_demographic directly, ignoring
+  // the district filter entirely. "Interested" and "Priority-eligible" aren't broken down by district
+  // in Code.gs (only registered/eligible are, via by_district), so those two stay programme-wide with
+  // an explicit note rather than silently showing the wrong (unfiltered) number under a filtered view.
+  const AS = awareStats(FILTER_DISTRICT);
+  const distSuffix = FILTER_DISTRICT ? ` — ${titleCase(FILTER_DISTRICT)}` : '';
+  document.getElementById('awareEligNote').innerHTML = `<b>Eligibility rule:</b> ${A.eligibility_rule}. ${fmt(AS.eligible)} of ${fmt(AS.registered)} registrants qualify at intake (${AS.registered?pctTxt(AS.eligible, AS.registered):'—'})${distSuffix}. Persona KYC tab: fuller verification-level breakdown (${fmt(P.eligibility_overall.female.pass+P.eligibility_overall.male.pass)} of ${fmt(P.total)} pass all 7 criteria).`;
   document.getElementById('awareEligRuleP').textContent = A.eligibility_rule + '.';
 
   const totElT = DIVISION_TARGETS.reduce((s,d)=>s+d.eligible_target,0);
@@ -1726,16 +1805,18 @@ function renderAwareness(){
   // (priority) rather than P7-only (scheduling back-up) — fired from Code.gs's buildAwarenessLive().
   const PE = A.priority_eligibility;
   document.getElementById('awareKpi').innerHTML = [
-    ['Registered', fmt(A.registered), '', true],
-    ['Interested', fmt(A.interested), pctTxt(A.interested,A.registered), true],
-    ['Eligible', fmt(A.eligible_demographic), pctTxt(A.eligible_demographic,A.registered), true],
-    ['Priority-eligible (S1–S5)', PE?fmt(PE.priority):'—', PE?(pctTxt(PE.priority,PE.total)+' of eligible · '+pctTxt(PE.priority,totElT)+` of ${fmt(totElT)} programme-wide target`):'Not live yet', !!PE],
+    ['Registered', fmt(AS.registered), distSuffix.replace(' — ',''), true],
+    ['Interested', fmt(A.interested), pctTxt(A.interested,A.registered)+(FILTER_DISTRICT?' · programme-wide (not tracked per-district)':''), true],
+    ['Eligible', fmt(AS.eligible), (AS.registered?pctTxt(AS.eligible,AS.registered):'—')+distSuffix.replace(' — ',''), true],
+    ['Priority-eligible (S1–S5)', PE?fmt(PE.priority):'—', (PE?(pctTxt(PE.priority,PE.total)+' of eligible · '+pctTxt(PE.priority,totElT)+` of ${fmt(totElT)} programme-wide target`):'Not live yet')+(FILTER_DISTRICT?' · programme-wide (not tracked per-district)':''), !!PE],
     ['Eligible — at Baseline', '—', 'Not live yet', false],
   ].map(([l,v,s,live])=>`<div class="card"><span class="tag" ${live?'':'style="background:#EFEAE0;color:var(--muted);"'}>${live?(l.includes('Priority')?'REAL vs TARGET':'REAL'):'NOT LIVE'}</span><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join('');
 
+  // Funnel chart stays programme-wide even when filtered — same reason as the Executive Summary
+  // funnel (Interested isn't tracked per-district in the source data).
   mk('awareFunnelChart', {
     type:'bar',
-    data:{ labels:['Registered','Interested','Eligible'], datasets:[{ label:'Youth', data:[A.registered,A.interested,A.eligible_demographic], backgroundColor:[teal,coral,gold] }] },
+    data:{ labels:['Registered','Interested','Eligible'], datasets:[{ label:'Youth'+(FILTER_DISTRICT?' (all districts)':''), data:[A.registered,A.interested,A.eligible_demographic], backgroundColor:[teal,coral,gold] }] },
     options:{ plugins:{legend:{display:false}}, onHover:chartHover, onClick:()=>awareDrillDistricts() }
   });
 
@@ -1743,13 +1824,20 @@ function renderAwareness(){
   // same rows Persona KYC uses, just with the priority (education-adjusted) S1–S5 rule — income unchanged at UGX 35,000/week.
   // Falls back to a "not live yet" placeholder only if the live field hasn't arrived
   // (e.g. viewing offline, or Code.gs not yet redeployed with this update).
-  if (A.tightened_kyc && A.tightened_kyc.total) {
-    const kycBottleneck = computeKycBottleneck(A.tightened_kyc, AWARE_KYC_CRIT_LABELS);
+  // District-scoped (2026-08-12 fix): tightened_kyc_by_district['' or a district code] added to
+  // Code.gs so this table (previously always programme-wide) now respects the district filter, same
+  // as Persona KYC. Falls back to the old programme-wide A.tightened_kyc if viewing a stale cached
+  // payload from before this field existed — flagged with a note rather than silently mismatching.
+  const tkFallback = FILTER_DISTRICT && !A.tightened_kyc_by_district;
+  const tk = A.tightened_kyc_by_district ? A.tightened_kyc_by_district[rawDistrict(FILTER_DISTRICT)] : A.tightened_kyc;
+  if (tk && tk.total) {
+    const kycBottleneck = computeKycBottleneck(tk, AWARE_KYC_CRIT_LABELS);
     document.getElementById('awareKycTable').innerHTML = `<tr><th>Criterion</th><th># Failing</th><th>% of Total</th><th>Status</th></tr>` +
-      kycBottleneck.map(k=>`<tr class="kpi-clickable" onclick="awareDrillKycCriterion('${k.criterion}',${k.failing},${A.tightened_kyc.total})"><td><b>${k.criterion}</b> ›</td><td>${fmt(k.failing)}</td><td>${k.pctOfTotal}%</td><td>${k.status}</td></tr>`).join('');
+      kycBottleneck.map(k=>`<tr class="kpi-clickable" onclick="awareDrillKycCriterion('${k.criterion}',${k.failing},${tk.total})"><td><b>${k.criterion}</b> ›</td><td>${fmt(k.failing)}</td><td>${k.pctOfTotal}%</td><td>${k.status}</td></tr>`).join('') +
+      (tkFallback ? `<tr><td colspan="4" style="color:var(--muted);font-size:11px;">Programme-wide (reload the page to get the district-scoped version).</td></tr>` : '');
   } else {
     document.getElementById('awareKycTable').innerHTML = `<tr><th>Criterion</th><th># Failing</th><th>% of Total</th><th>Status</th></tr>
-      <tr><td colspan="4" style="color:var(--muted);text-align:center;padding:14px;">Awaiting live data — redeploy the updated Code.gs to enable.</td></tr>`;
+      <tr><td colspan="4" style="color:var(--muted);text-align:center;padding:14px;">${(FILTER_DISTRICT && A.tightened_kyc_by_district) ? 'No KYC-screened registrants in this district yet.' : 'Awaiting live data — redeploy the updated Code.gs to enable.'}</td></tr>`;
   }
 
   // Commitment Screening (2026-08-11): LIVE — these five questions are part of the same intake form
@@ -1775,21 +1863,33 @@ function renderAwareness(){
     // registrants, from Code.gs's buildCommitmentRisk(). Gender split shown inline; district/parish
     // breakdown lives behind the click-through drill (crDrillCategory / crDrillCategoryParish) —
     // this replaces a second always-visible table that just repeated these same 4 numbers.
+    // District-scoped (2026-08-12 fix): buildCommitmentRisk() already computed by_district, it just
+    // wasn't being read here — these cards always showed the programme-wide totals regardless of the
+    // filter. Also added by_district[d].by_gender to Code.gs so the gender table below can scope too
+    // (previously only the programme-wide by_gender was available).
     const risk = COMMITMENT_SCREENING.risk;
-    if (risk && risk.total_eligible) {
-      const riskCard = (label, n, tag, color, cat) => `<div class="card kpi-clickable" onclick="crDrillCategory('${cat}')"><span class="tag" style="background:${color}22;color:${color};">${tag} ›</span><div class="label">${label}</div><div class="value">${fmt(n)}</div><div class="sub">${pctTxt(n, risk.total_eligible)} of eligible</div></div>`;
+    const riskDistSlice = (FILTER_DISTRICT && risk && risk.by_district) ? risk.by_district[rawDistrict(FILTER_DISTRICT)] : null;
+    const riskScoped = riskDistSlice || risk || {};
+    const riskTotal = riskDistSlice ? riskDistSlice.total : (risk ? risk.total_eligible : 0);
+    if (risk && riskTotal) {
+      const riskCard = (label, n, tag, color, cat) => `<div class="card kpi-clickable" onclick="crDrillCategory('${cat}')"><span class="tag" style="background:${color}22;color:${color};">${tag} ›</span><div class="label">${label}</div><div class="value">${fmt(n)}</div><div class="sub">${pctTxt(n, riskTotal)} of eligible</div></div>`;
       document.getElementById('awareCommitmentRiskKpi').innerHTML =
-        riskCard('Low risk — ready & prepared', risk.low, 'LOW', 'var(--green)', 'low') +
-        riskCard('Moderate risk — minor barriers', risk.moderate, 'MODERATE', '#A87A1E', 'moderate') +
-        riskCard('High risk — significant barriers', risk.high, 'HIGH', 'var(--coral)', 'high') +
-        `<div class="card kpi-clickable" onclick="crDrillCategory('incomplete')"><span class="tag" style="background:#EFEAE0;color:var(--muted);">INCOMPLETE ›</span><div class="label">Screening incomplete</div><div class="value">${fmt(risk.incomplete)}</div><div class="sub">${pctTxt(risk.incomplete, risk.total_eligible)} of eligible</div></div>`;
+        riskCard('Low risk — ready & prepared', riskScoped.low, 'LOW', 'var(--green)', 'low') +
+        riskCard('Moderate risk — minor barriers', riskScoped.moderate, 'MODERATE', '#A87A1E', 'moderate') +
+        riskCard('High risk — significant barriers', riskScoped.high, 'HIGH', 'var(--coral)', 'high') +
+        `<div class="card kpi-clickable" onclick="crDrillCategory('incomplete')"><span class="tag" style="background:#EFEAE0;color:var(--muted);">INCOMPLETE ›</span><div class="label">Screening incomplete</div><div class="value">${fmt(riskScoped.incomplete)}</div><div class="sub">${pctTxt(riskScoped.incomplete, riskTotal)} of eligible</div></div>`;
 
-      const bg = risk.by_gender || {};
+      // Gender-by-risk table: uses the district's own by_gender breakdown when filtered and available
+      // (added to Code.gs 2026-08-12); falls back to the programme-wide by_gender with a note if
+      // viewing a stale cached payload from before that field existed.
+      const bgFallback = FILTER_DISTRICT && !(riskDistSlice && riskDistSlice.by_gender);
+      const bg = (riskDistSlice && riskDistSlice.by_gender) || risk.by_gender || {};
       const genderRow = (g,label) => {
         const gg = bg[g] || {low:0,moderate:0,high:0,incomplete:0,total:0};
         return `<tr><td><b>${label}</b></td><td>${fmt(gg.low)} (${pctTxt(gg.low,gg.total)})</td><td>${fmt(gg.moderate)} (${pctTxt(gg.moderate,gg.total)})</td><td>${fmt(gg.high)} (${pctTxt(gg.high,gg.total)})</td><td>${fmt(gg.incomplete)} (${pctTxt(gg.incomplete,gg.total)})</td></tr>`;
       };
-      document.getElementById('awareCommitmentRiskGenderTable').innerHTML = `<tr><th>Gender</th><th>Low</th><th>Moderate</th><th>High</th><th>Incomplete</th></tr>${genderRow('female','Female')}${genderRow('male','Male')}`;
+      document.getElementById('awareCommitmentRiskGenderTable').innerHTML = `<tr><th>Gender</th><th>Low</th><th>Moderate</th><th>High</th><th>Incomplete</th></tr>${genderRow('female','Female')}${genderRow('male','Male')}` +
+        (bgFallback ? `<tr><td colspan="5" style="color:var(--muted);font-size:11px;">Programme-wide (reload the page to get the district-scoped version).</td></tr>` : '');
     } else {
       document.getElementById('awareCommitmentRiskKpi').innerHTML = ['Low risk','Moderate risk','High risk','Screening incomplete']
         .map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">AWAITING DATA</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
@@ -1810,11 +1910,14 @@ function renderAwareness(){
   // "Anticipated barriers to participation" chart (awareBarriersNote/awareBarriersChart) removed
   // 2026-08-11 per request — it was June-pilot-only data (a question that isn't in the RCT form).
 
+  // District-scoped (2026-08-12 fix): daily_eligible_trend_by_district added to Code.gs so this
+  // chart (previously always programme-wide) now respects the district filter.
+  const dailyTrendSrc = (FILTER_DISTRICT && A.daily_eligible_trend_by_district) ? (A.daily_eligible_trend_by_district[rawDistrict(FILTER_DISTRICT)] || []) : A.daily_eligible_trend;
   mk('awareDailyChart', {
     type:'bar',
-    data:{ labels: A.daily_eligible_trend.map(d=>d.date), datasets:[
-      { type:'bar', label:'Daily eligible', data: A.daily_eligible_trend.map(d=>d.daily), backgroundColor: teal, order:2 },
-      { type:'line', label:'Cumulative', data: A.daily_eligible_trend.map(d=>d.cumulative), borderColor: gold, backgroundColor: gold, tension:0.3, yAxisID:'y1', order:1, datalabels:{display:false} },
+    data:{ labels: dailyTrendSrc.map(d=>d.date), datasets:[
+      { type:'bar', label:'Daily eligible', data: dailyTrendSrc.map(d=>d.daily), backgroundColor: teal, order:2 },
+      { type:'line', label:'Cumulative', data: dailyTrendSrc.map(d=>d.cumulative), borderColor: gold, backgroundColor: gold, tension:0.3, yAxisID:'y1', order:1, datalabels:{display:false} },
     ]},
     options:{ scales:{ y:{ beginAtZero:true }, y1:{ position:'right', beginAtZero:true, grid:{drawOnChartArea:false} } } }
   });
@@ -1839,19 +1942,31 @@ function renderAwareness(){
       return `<tr${rowAttrs}><td><b>${d.location}</b>${arrow}</td><td>${fmt(d.eligible_target)}</td><td>${fmt(registered)}</td><td>${fmt(eligible)}</td><td>${femalePct}</td></tr>`;
     }).join('');
 
-  { const eduKeys = sortEducationKeys(Object.keys(A.education_level));
-    mk('awareEduChart', { type:'bar', data:{ labels:eduKeys.map(k=>k.toUpperCase()), datasets:[{label:'Youth',data:eduKeys.map(k=>A.education_level[k]), backgroundColor:gold}]}, options:{plugins:{legend:{display:false}}} }); }
-  mk('awareDriversChart', { type:'bar', data:{ labels:Object.keys(A.registration_drivers).map(k=>k.replace(/_/g,' ')), datasets:[{label:'Youth',data:Object.values(A.registration_drivers), backgroundColor:inkSoft}]}, options:{indexAxis:'y',plugins:{legend:{display:false}, datalabels:{anchor:'end',align:'right',offset:4}}} });
+  // District-scoped (2026-08-12 fix): education_level_by_district / registration_drivers_by_district
+  // added to Code.gs so these two charts (previously always programme-wide) now respect the district
+  // filter. Falls back to the programme-wide field if viewing a stale cached payload from before
+  // these existed, or if the selected district genuinely has no rows yet.
+  { const eduSrc = (FILTER_DISTRICT && A.education_level_by_district) ? (A.education_level_by_district[rawDistrict(FILTER_DISTRICT)] || {}) : A.education_level;
+    const eduKeys = sortEducationKeys(Object.keys(eduSrc));
+    mk('awareEduChart', { type:'bar', data:{ labels:eduKeys.map(k=>k.toUpperCase()), datasets:[{label:'Youth',data:eduKeys.map(k=>eduSrc[k]), backgroundColor:gold}]}, options:{plugins:{legend:{display:false}}} }); }
+  { const driversSrc = (FILTER_DISTRICT && A.registration_drivers_by_district) ? (A.registration_drivers_by_district[rawDistrict(FILTER_DISTRICT)] || {}) : A.registration_drivers;
+    mk('awareDriversChart', { type:'bar', data:{ labels:Object.keys(driversSrc).map(k=>k.replace(/_/g,' ')), datasets:[{label:'Youth',data:Object.values(driversSrc), backgroundColor:inkSoft}]}, options:{indexAxis:'y',plugins:{legend:{display:false}, datalabels:{anchor:'end',align:'right',offset:4}}} }); }
 
+  // District-scoped (2026-08-12 fix): gender_all_by_district / gender_eligible_by_district added to
+  // Code.gs so this table (previously always programme-wide) now respects the district filter.
+  const genderAllSrc = (FILTER_DISTRICT && A.gender_all_by_district) ? (A.gender_all_by_district[rawDistrict(FILTER_DISTRICT)] || {female:0,male:0}) : A.by_gender_all;
+  const genderEligSrc = (FILTER_DISTRICT && A.gender_eligible_by_district) ? (A.gender_eligible_by_district[rawDistrict(FILTER_DISTRICT)] || {female:0,male:0}) : A.by_gender_eligible;
+  const genderIsFallback = FILTER_DISTRICT && !A.gender_all_by_district;
   const awareGenderRows = [
-    ['Registered', A.by_gender_all.female, A.by_gender_all.male],
-    ['Eligible', A.by_gender_eligible.female, A.by_gender_eligible.male],
+    ['Registered', genderAllSrc.female, genderAllSrc.male],
+    ['Eligible', genderEligSrc.female, genderEligSrc.male],
   ];
   document.getElementById('awareGenderTable').innerHTML = `<tr><th>Stage</th><th>Female</th><th>Male</th><th>% Female</th></tr>` +
     awareGenderRows.map(([label,f,m])=>{
       const p = pct(f, f+m);
       return `<tr><td><b>${label}</b></td><td>${fmt(f)}</td><td>${fmt(m)}</td><td style="color:${p>=50?'var(--green)':'var(--coral)'};font-weight:700">${p.toFixed(1)}%</td></tr>`;
-    }).join('');
+    }).join('') +
+    (genderIsFallback ? `<tr><td colspan="4" style="color:var(--muted);font-size:11px;">Programme-wide (reload the page to get the district-scoped version).</td></tr>` : '');
 
   document.getElementById('awareParishTable').innerHTML = `<tr><th>District</th><th>Registered</th><th>Eligible</th><th>% Female</th></tr>` +
     Object.entries(A.by_district||{}).sort((a,b)=>b[1].registered-a[1].registered).map(([d,v])=>
@@ -1898,10 +2013,17 @@ function renderBaselineTracking(){
   // Awareness registrant (not just the eligible subset baseline_tracking covers) — see by_district/
   // by_parish's new `baselined` field and the top-level `baselined_all`.
   const mbDistrictEntries = Object.entries(A.by_district);
+  // District-scoped (2026-08-12 fix): A.by_district already carries registered/eligible/baselined per
+  // district (used by the table just below), it just wasn't being used to scope these three cards —
+  // they always showed the programme-wide totals regardless of the filter. No Code.gs change needed.
+  const mbSlice = FILTER_DISTRICT ? A.by_district[rawDistrict(FILTER_DISTRICT)] : null;
+  const mbRecruited = mbSlice ? mbSlice.registered : A.registered;
+  const mbEligible = mbSlice ? mbSlice.eligible : A.eligible_demographic;
+  const mbBaselined = mbSlice ? (mbSlice.baselined||0) : (A.baselined_all||0);
   document.getElementById('awareMarketingBaselineKpi').innerHTML = [
-    { label:'Recruited (marketing)', value: fmt(A.registered) },
-    { label:'Eligible', value: fmt(A.eligible_demographic), sub: pctTxt(A.eligible_demographic, A.registered)+' of recruited' },
-    { label:'Baselined', value: fmt(A.baselined_all||0), sub: pctTxt(A.baselined_all||0, A.registered)+' of recruited' },
+    { label:'Recruited (marketing)', value: fmt(mbRecruited) },
+    { label:'Eligible', value: fmt(mbEligible), sub: pctTxt(mbEligible, mbRecruited)+' of recruited' },
+    { label:'Baselined', value: fmt(mbBaselined), sub: pctTxt(mbBaselined, mbRecruited)+' of recruited' },
   ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub||''}</div></div>`).join('');
 
   document.getElementById('awareMarketingBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th></tr>` +
@@ -2980,7 +3102,7 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
    tripped, or a sheet was renamed/moved), NONE of the live sections are
    applied — the dashboard keeps the embedded snapshot everywhere and the
    badge shows the error, rather than partially overwriting good data. */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwf0TBAFd27YOufk3nIml3-UL3dM1O9gQtBfENkn1w7T5BGhNCQew9OqfL0OC7bXZBx/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzs3J7u5MGtNghnXHOq1VGGEE4wYBXQ11TYn5H06Y6v243oVI3IQDRmxLHpXpf80bqk/exec';
 let LIVE_DATA_STATUS = 'offline'; // 'offline' | 'live' | 'error'
 let LIVE_DATA_TIMESTAMP = null;
 let LIVE_DATA_ERROR = null;

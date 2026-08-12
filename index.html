@@ -1082,11 +1082,14 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
       <option value="priority">Priority (S1–S5)</option>
       <option value="backup">Backup (P7)</option>
     </select>
+    <span class="gf-label">Registered on</span>
+    <select id="enumDateFilter"><option value="">All dates</option></select>
     <span class="gf-label">Search</span>
     <input id="enumSearch" type="text" placeholder="Name or youth ID…" style="padding:7px 10px;border-radius:6px;border:1px solid #D8D2C2;font-size:13px;min-width:180px;">
   </div>
 
   <div class="note">Baseline scheduling priority: S1–S5 candidates are called first; P7 youth stay fully eligible, sorted as a back-up pool for if S1–S5 targets aren't met. No P7 candidates on the tracker yet, so Backup is 0.</div>
+  <div class="note">"Registered on" filters by <i>survey_date</i> (Awareness submission date) — it defaults to yesterday's registrations, since baseline should follow registration promptly. Switch it to "All dates" to see the full backlog.</div>
   <div class="exec-band"><span class="num">1</span><h3>Progress</h3><div class="rule"></div></div>
   <div class="grid" id="enumKpi"></div>
 
@@ -1251,6 +1254,11 @@ function rawDistrict(d){ return DISTRICT_RAW_CODE[d] || d; }
 const DISTRICT_CODES = ['IGANGA','JINJA','LUWEERO','MASAKA','MPIGI'];
 const DISTRICT_LABEL = { IGANGA:'Iganga', JINJA:'Jinja', LUWEERO:'Luweero', MASAKA:'Masaka', MPIGI:'Mpigi' };
 function distLabel(d){ return DISTRICT_LABEL[d] || titleCase(d); }
+// Maps each of DIVISION_TARGETS' 7 locations to its short district-filter code (2026-08-12, for the
+// Executive Summary's "progress on target, by division" KPI cards). Mirrors resolveMobiliserLocation()
+// in Code.gs: Wobulenzi is a division within Luweero, Masaka Mukungwe/Nyendo are both divisions within
+// Masaka — so all three roll up to their parent district's short code when the global filter is used.
+const DIVISION_TO_DISTRICT = { 'Iganga':'IGANGA', 'Jinja':'JINJA', 'Luweero':'LUWEERO', 'Wobulenzi':'LUWEERO', 'Masaka Mukungwe':'MASAKA', 'Masaka Nyendo':'MASAKA', 'Mpigi':'MPIGI' };
 
 // Commitment Screening rubric text (2026-08-11) — moved out of a standalone always-visible table
 // (which duplicated the live "Score by criterion" cards below it) into a lookup consumed by
@@ -1553,15 +1561,24 @@ function renderExec(){
     }).join('');
 
   // ---- 2c: progress on target, by division ----
-  const activeDT = DIVISION_TARGETS.filter(d=>d.status==='active');
-  const totElT = DIVISION_TARGETS.reduce((s,d)=>s+d.eligible_target,0);
-  const totElA = DIVISION_TARGETS.reduce((s,d)=>s+d.actual_eligible,0);
-  const totBlT = DIVISION_TARGETS.reduce((s,d)=>s+d.baseline_target,0);
-  const totBlA = DIVISION_TARGETS.reduce((s,d)=>s+d.actual_baselined,0);
+  // District-scoped summary cards (2026-08-12 fix): DIVISION_TARGETS has 7 locations, finer-grained
+  // than the 5-code district filter (Wobulenzi is part of Luweero; Masaka Mukungwe/Nyendo are both
+  // part of Masaka — see resolveMobiliserLocation() in Code.gs, which is the source of truth this
+  // mirrors). These KPI cards previously summed ALL 7 locations regardless of the filter. The table
+  // and chart just below stay showing all 7 locations always — same "full comparison view, not
+  // scoped by the global filter" convention already used everywhere else on this dashboard
+  // (execDistConversionTable, awareDistTable, mtLocationTargetTable, awareParishTable, etc.) — only
+  // the aggregate summary cards, which represent "the current scope" rather than a comparison, scope.
+  const dtScope = FILTER_DISTRICT ? DIVISION_TARGETS.filter(d=>DIVISION_TO_DISTRICT[d.location]===FILTER_DISTRICT) : DIVISION_TARGETS;
+  const activeDT = dtScope.filter(d=>d.status==='active');
+  const totElT = dtScope.reduce((s,d)=>s+d.eligible_target,0);
+  const totElA = dtScope.reduce((s,d)=>s+d.actual_eligible,0);
+  const totBlT = dtScope.reduce((s,d)=>s+d.baseline_target,0);
+  const totBlA = dtScope.reduce((s,d)=>s+d.actual_baselined,0);
   document.getElementById('divTargetKpi').innerHTML = [
-    { label:'Locations active', value: `${activeDT.length} of ${DIVISION_TARGETS.length}`, sub: activeDT.map(d=>d.location).join(', ') },
-    { label:'Eligible-interested youth', value: fmt(totElA), sub: pctTxt(totElA, totElT)+` of ${fmt(totElT)} programme-wide target` },
-    { label:'Baselined', value: fmt(totBlA), sub: pctTxt(totBlA, totBlT)+` of ${fmt(totBlT)} programme-wide target` },
+    { label:'Locations active', value: `${activeDT.length} of ${dtScope.length}`, sub: (activeDT.map(d=>d.location).join(', ') || 'None yet')+distSuffix },
+    { label:'Eligible-interested youth', value: fmt(totElA), sub: pctTxt(totElA, totElT)+` of ${fmt(totElT)}${FILTER_DISTRICT?'':' programme-wide'} target` },
+    { label:'Baselined', value: fmt(totBlA), sub: pctTxt(totBlA, totBlT)+` of ${fmt(totBlT)}${FILTER_DISTRICT?'':' programme-wide'} target` },
   ].map(c=>`<div class="card"><span class="tag">REAL vs TARGET</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
 
   mk('divTargetChart', {
@@ -1665,9 +1682,17 @@ function renderExec(){
 
   // ---- 7: gender across the funnel — chart + table ----
   // Mobilised/Acquired rows removed — Mobilisation/Acquisition muted pending go-live wiring.
+  // District-scoped (2026-08-12 fix): gender_all_by_district / gender_eligible_by_district have been
+  // available since v25 and were already wired into the Awareness tab's own gender table (see
+  // genderAllSrc/genderEligSrc in renderAwareness()) — this Executive Summary copy was missed and kept
+  // reading the flat programme-wide totals regardless of the district filter. Same fallback-with-note
+  // convention as the rest of the dashboard if a stale cached payload predates these fields.
+  const execGenderIsFallback = FILTER_DISTRICT && !A.gender_all_by_district;
+  const execGenderAllSrc = (FILTER_DISTRICT && A.gender_all_by_district) ? (A.gender_all_by_district[rawDistrict(FILTER_DISTRICT)] || {female:0,male:0}) : A.by_gender_all;
+  const execGenderEligSrc = (FILTER_DISTRICT && A.gender_eligible_by_district) ? (A.gender_eligible_by_district[rawDistrict(FILTER_DISTRICT)] || {female:0,male:0}) : A.by_gender_eligible;
   const genderRows = [
-    ['Registered', A.by_gender_all.female, A.by_gender_all.male],
-    ['Eligible (Awareness)', A.by_gender_eligible.female, A.by_gender_eligible.male],
+    ['Registered', execGenderAllSrc.female, execGenderAllSrc.male],
+    ['Eligible (Awareness)', execGenderEligSrc.female, execGenderEligSrc.male],
   ];
   const genderFemalePct = genderRows.map(([,f,m])=>pct(f,f+m));
   mk('execGenderChart', {
@@ -1687,7 +1712,8 @@ function renderExec(){
       const p = genderFemalePct[i];
       const col = p>=60?'var(--green)':(p>=45?'#A87A1E':'var(--coral)');
       return `<tr class="kpi-clickable" onclick="simpleDrill('${label}','GENDER','<div class=\\'drill-row\\'><span>Female</span><span><b>${f}</b></span></div><div class=\\'drill-row\\'><span>Male</span><span><b>${m}</b></span></div>')"><td><b>${label}</b> ›</td><td>${fmt(f)}</td><td>${fmt(m)}</td><td style="color:${col};font-weight:700">${p.toFixed(1)}%</td><td>${(100-p).toFixed(1)}%</td><td>60% F / 40% M</td></tr>`;
-    }).join('');
+    }).join('') +
+    (execGenderIsFallback ? `<tr><td colspan="6" style="color:var(--muted);font-size:11px;">Programme-wide (reload the page to get the district-scoped version).</td></tr>` : '');
 
   // Mindset shift (formerly section 9, "baseline vs endline") removed from Executive Summary
   // 2026-08-11 per request — the same chart still exists on the Endline tab (renderEndline(),
@@ -1696,10 +1722,18 @@ function renderExec(){
   // ---- 9: marketing (recruitment) vs. baseline overview ----
   // LIVE (2026-08-11): see the matching note in renderAwareness() — Code.gs's buildAwarenessLive()
   // now tracks baselined status against every registrant, not just the eligible subset.
+  // District-scoped (2026-08-12 fix): A.by_district already carries registered/eligible/baselined per
+  // district — the Awareness tab's own copy of this section (awareMarketingBaselineKpi) already scopes
+  // via this same mbSlice pattern; this Executive Summary copy was missed and kept reading the flat
+  // programme-wide totals regardless of the district filter.
+  const esMbSlice = FILTER_DISTRICT ? A.by_district[rawDistrict(FILTER_DISTRICT)] : null;
+  const esMbRecruited = esMbSlice ? esMbSlice.registered : A.registered;
+  const esMbEligible = esMbSlice ? esMbSlice.eligible : A.eligible_demographic;
+  const esMbBaselined = esMbSlice ? (esMbSlice.baselined||0) : (A.baselined_all||0);
   document.getElementById('esMarketingBaselineKpi').innerHTML = [
-    { label:'Recruited (marketing)', value: fmt(A.registered) },
-    { label:'Eligible', value: fmt(A.eligible_demographic), sub: pctTxt(A.eligible_demographic, A.registered)+' of recruited' },
-    { label:'Baselined', value: fmt(A.baselined_all||0), sub: pctTxt(A.baselined_all||0, A.registered)+' of recruited' },
+    { label:'Recruited (marketing)', value: fmt(esMbRecruited) },
+    { label:'Eligible', value: fmt(esMbEligible), sub: pctTxt(esMbEligible, esMbRecruited)+' of recruited' },
+    { label:'Baselined', value: fmt(esMbBaselined), sub: pctTxt(esMbBaselined, esMbRecruited)+' of recruited' },
   ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub||''}</div></div>`).join('');
 
   document.getElementById('esMarketingBaselineTable').innerHTML = `<tr><th>District</th><th>Recruited (marketing)</th><th>Eligible</th><th>Baselined</th><th>% of Recruited</th><th>% of Eligible</th></tr>` +
@@ -2568,6 +2602,7 @@ document.getElementById('mtMobiliser').addEventListener('change', (e)=>{ FILTER_
 document.getElementById('enumParish').addEventListener('change', (e)=>{ FILTER_PARISH = e.target.value; renderEnumerator(); });
 document.getElementById('enumBaselineFilter').addEventListener('change', (e)=>{ FILTER_BASELINE = e.target.value; renderEnumerator(); });
 document.getElementById('enumPriorityFilter').addEventListener('change', (e)=>{ FILTER_PRIORITY = e.target.value; renderEnumerator(); });
+document.getElementById('enumDateFilter').addEventListener('change', (e)=>{ FILTER_ENUM_DATE = e.target.value; renderEnumerator(); });
 document.getElementById('enumSearch').addEventListener('input', (e)=>{ FILTER_ENUM_SEARCH = e.target.value; renderEnumerator(); });
 
 
@@ -2818,6 +2853,13 @@ let FILTER_PARISH = '';
 // by default; switch the dropdown to "All" or "Baselined" to see everyone.
 let FILTER_BASELINE = 'no';
 let FILTER_PRIORITY = '';
+// Registration-date filter (2026-08-12): defaults to yesterday's survey_date the first time the
+// tab renders, so the worklist opens on "who registered yesterday and needs baselining first" per
+// staff request. ENUM_DATE_DEFAULTED flips true once that auto-default has been applied, so it
+// never overrides a filter the person picks themselves on later renders (e.g. switching back to
+// "All dates" should stick, not get reset to yesterday on the next auto-refresh).
+let FILTER_ENUM_DATE = '';
+let ENUM_DATE_DEFAULTED = false;
 let FILTER_ENUM_SEARCH = '';
 
 function enumFilteredRows(){
@@ -2831,6 +2873,7 @@ function enumFilteredRows(){
       if(FILTER_PRIORITY === 'priority' && tier !== 1) return false;
       if(FILTER_PRIORITY === 'backup' && tier !== 2) return false;
     }
+    if(FILTER_ENUM_DATE && y.survey_date !== FILTER_ENUM_DATE) return false;
     if(FILTER_ENUM_SEARCH){
       const q = FILTER_ENUM_SEARCH.toLowerCase();
       if(!y.youth_id.toLowerCase().includes(q) && !y.name.toLowerCase().includes(q)) return false;
@@ -2855,6 +2898,12 @@ function eduPriorityTag(edu){
   return { tier: 3, cls: '', label: e ? e.toUpperCase() : '—' };
 }
 
+// "MM/dd" (survey_date's format, from Code.gs's toDateKey()) -> a sortable number, most-recent-last.
+// No year in the key, same limitation toDateKey()/dateKeyToSortable() already accept server-side —
+// fine for a single registration window, would need a year component if this spans a year boundary.
+function enumDateKeySortable(key){ const p = String(key||'').split('/'); return Number(p[0])*100 + Number(p[1]); }
+function enumMmdd(date){ return String(date.getMonth()+1).padStart(2,'0')+'/'+String(date.getDate()).padStart(2,'0'); }
+
 function renderEnumerator(){
   // rebuild parish options for the current district filter
   const districtScope = FILTER_DISTRICT ? ENUMERATOR_LIST.filter(y=>y.district===rawDistrict(FILTER_DISTRICT)) : ENUMERATOR_LIST;
@@ -2864,6 +2913,23 @@ function renderEnumerator(){
   parishSel.innerHTML = `<option value="">All parishes</option>` + parishes.map(p=>`<option value="${p}">${humanizeLoc(p)}</option>`).join('');
   if(parishes.includes(prevParish)){ parishSel.value = prevParish; } else { FILTER_PARISH = ''; parishSel.value=''; }
 
+  // Registration-date options, most recent first — built from survey_date across the full list
+  // (not district-scoped, so switching districts doesn't hide the date someone's looking for).
+  const dateSel = document.getElementById('enumDateFilter');
+  const dateKeys = [...new Set(ENUMERATOR_LIST.map(y=>y.survey_date).filter(Boolean))].sort((a,b)=>enumDateKeySortable(b)-enumDateKeySortable(a));
+  const yesterdayKey = enumMmdd(new Date(Date.now() - 86400000));
+  const todayKey = enumMmdd(new Date());
+  if(!ENUM_DATE_DEFAULTED){
+    ENUM_DATE_DEFAULTED = true;
+    if(dateKeys.includes(yesterdayKey)) FILTER_ENUM_DATE = yesterdayKey; // prioritise baselining yesterday's registrations by default
+  }
+  const prevDate = FILTER_ENUM_DATE;
+  dateSel.innerHTML = `<option value="">All dates</option>` + dateKeys.map(d=>{
+    const tag = d===yesterdayKey ? ' (yesterday)' : d===todayKey ? ' (today)' : '';
+    return `<option value="${d}">${d}${tag}</option>`;
+  }).join('');
+  if(dateKeys.includes(prevDate)){ dateSel.value = prevDate; } else { FILTER_ENUM_DATE = ''; dateSel.value=''; }
+
   const rows = enumFilteredRows();
   const total = rows.length;
   const baselined = rows.filter(y=>y.baselined).length;
@@ -2871,15 +2937,16 @@ function renderEnumerator(){
   const priorityCount = rows.filter(y=>eduPriorityTag(y.education).tier===1).length;
   const backupCount = rows.filter(y=>eduPriorityTag(y.education).tier===2).length;
 
+  const dateSuffix = FILTER_ENUM_DATE ? ` · registered ${FILTER_ENUM_DATE}${FILTER_ENUM_DATE===yesterdayKey?' (yesterday)':FILTER_ENUM_DATE===todayKey?' (today)':''}` : '';
   document.getElementById('enumKpi').innerHTML = [
-    { label:'Eligible youth (filtered)', value: fmt(total), sub: FILTER_DISTRICT ? titleCase(FILTER_DISTRICT) : 'All districts' },
+    { label:'Eligible youth (filtered)', value: fmt(total), sub: (FILTER_DISTRICT ? titleCase(FILTER_DISTRICT) : 'All districts')+dateSuffix },
     { label:'Baselined', value: fmt(baselined), sub: pctTxt(baselined, total)+' of filtered list' },
     { label:'Not yet baselined', value: fmt(notYet), sub: pctTxt(notYet, total)+' of filtered list' },
     { label:'Priority (S1–S5)', value: fmt(priorityCount), sub: pctTxt(priorityCount, total)+' of filtered list — call first' },
     { label:'Backup (P7)', value: fmt(backupCount), sub: backupCount ? pctTxt(backupCount, total)+' of filtered list — back-up pool' : 'None in this list currently' },
   ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
 
-  document.getElementById('enumCount').textContent = `Showing ${fmt(total)} of ${fmt(ENUMERATOR_LIST.length)} eligible youth programme-wide. Sorted priority-first: S1–S5 candidates, then P7 back-ups.`;
+  document.getElementById('enumCount').textContent = `Showing ${fmt(total)} of ${fmt(ENUMERATOR_LIST.length)} eligible youth programme-wide${dateSuffix}. Sorted priority-first: S1–S5 candidates, then P7 back-ups.`;
 
   // Sorted priority-first (S1–S5 before P7) even though Priority isn't its own column anymore — click a row
   // to see education/priority/age/identity/availability detail in the drill panel.
@@ -2945,6 +3012,7 @@ function enumDrillYouth(youthId){
     <div class="dpanel"><h4>Identity</h4>
       <div class="drill-row"><span>Youth ID</span><span><b>${y.youth_id}</b></span></div>
       <div class="drill-row"><span>Registered name</span><span><b>${y.name||'—'}</b></span></div>
+      <div class="drill-row"><span>Registered on</span><span><b>${y.survey_date||'—'}</b></span></div>
       <div class="drill-row"><span>Name commonly used</span><span><b>${y.familiar_name||'Not yet recorded'}</b></span></div>
       <div class="drill-row"><span>Identity verified at screening</span><span><b>Not reliably linked to this list</b></span></div>
       <div class="drill-row"><span>Gender</span><span><b>${y.gender?titleCase(y.gender):'—'}</b></span></div>
@@ -3102,7 +3170,7 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
    tripped, or a sheet was renamed/moved), NONE of the live sections are
    applied — the dashboard keeps the embedded snapshot everywhere and the
    badge shows the error, rather than partially overwriting good data. */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzs3J7u5MGtNghnXHOq1VGGEE4wYBXQ11TYn5H06Y6v243oVI3IQDRmxLHpXpf80bqk/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby99rPPXipE2ixs1dhHSZDWngfdAJ7bFLoTPpwbWglP4lYMQc_fMKgD-ZN7bS1xywI/exec';
 let LIVE_DATA_STATUS = 'offline'; // 'offline' | 'live' | 'error'
 let LIVE_DATA_TIMESTAMP = null;
 let LIVE_DATA_ERROR = null;

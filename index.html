@@ -502,6 +502,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
       <div class="tab active" data-view="aware">Awareness<small>Registered → interested → eligible</small></div>
       <div class="tab" data-view="persona-kyc">Persona KYC<small>What's keeping youth out, by criterion</small></div>
       <div class="tab" data-view="youth-questions">Youth Questions<small>What youth are asking, by theme</small></div>
+      <div class="tab" data-view="baseline-analytics">Baseline Analytics<small>Coverage, eligibility & profile vs. Awareness</small></div>
       <div class="tab" data-view="mob" style="display:none">Mobilisation<small>Assigned → reached → confirmed</small></div>
       <div class="tab" data-view="acq" style="display:none">Acquisition<small>Verified → acquired</small></div>
     </div>
@@ -615,6 +616,10 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
   </div>
   <div class="note" id="esProfitNote" style="margin-top:16px;margin-bottom:14px;"></div>
   <div class="grid" id="esProfitKpi"></div>
+  <div class="panel" style="margin-bottom:16px;">
+    <div class="panel-head"><div><h3>Weekly income vs. eligibility threshold (UGX 35,000/week)</h3><p>Baseline weekly income (2-week income ÷ 2), banded against the same threshold used for eligibility.</p></div><span class="chip real">REAL</span></div>
+    <table id="esIncomeBandsTable"></table>
+  </div>
   <div class="grid g2">
     <div class="panel">
       <div class="panel-head"><div><h3>Baseline income vs. net profit, by district</h3></div><span class="chip real">REAL</span></div>
@@ -696,53 +701,12 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     <table id="awareParishTable"></table>
   </div>
 
-  <div class="exec-band"><span class="num">9</span><h3>Eligible &rarr; Baselined</h3><div class="rule"></div></div>
-  <div class="note" style="margin-bottom:14px;">Every eligible Awareness registrant (<span id="awareBaselineEligTotal"></span>) cross-referenced against completed Baseline surveys, matched by youth ID. This figure matches the Awareness-only eligible count above.</div>
-  <div class="grid" id="awareBaselineKpi"></div>
-  <div class="grid g2">
-    <div class="panel">
-      <div class="panel-head"><div><h3>By district</h3><p>Click a row to drill down.</p></div><span class="chip real">REAL</span></div>
-      <table id="awareBaselineDistTable"></table>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div><h3>By gender</h3></div><span class="chip real">REAL</span></div>
-      <table id="awareBaselineGenderTable"></table>
-    </div>
-  </div>
-
-  <div class="note" id="awareProfitNote" style="margin-top:16px;margin-bottom:14px;"></div>
-  <div class="grid" id="awareProfitKpi"></div>
-  <div class="grid g2">
-    <div class="panel">
-      <div class="panel-head"><div><h3>Baseline income vs. net profit, by district</h3></div><span class="chip real">REAL</span></div>
-      <canvas id="awareProfitChart" style="max-height:320px;"></canvas>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div><h3>Detail, by district</h3></div><span class="chip real">REAL</span></div>
-      <table id="awareProfitTable"></table>
-    </div>
-  </div>
-
-  <div class="exec-band"><span class="num">10</span><h3>Marketing vs. baseline — absolute numbers &amp; eligibility</h3><div class="rule"></div></div>
-  <div class="note" style="margin-bottom:14px;">All Awareness registrants ("marketing") against eligibility and completed baselines — not just the eligible subset baselined above. This helps assess overall baseline coverage, not only among the already-eligible pool. Same underlying figures as the Executive Summary and Enumerator Worklist.</div>
-  <div class="grid" id="awareMarketingBaselineKpi"></div>
-  <div class="grid g2">
-    <div class="panel">
-      <div class="panel-head"><div><h3>By district</h3><p>Parish-level detail is in the table to the right.</p></div><span class="chip real">REAL</span></div>
-      <table id="awareMarketingBaselineTable"></table>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><div><h3>By parish</h3><p>Top 10 by recruited.</p></div><span class="chip real">REAL</span></div>
-      <table id="awareMarketingBaselineParishTable"></table>
-    </div>
-  </div>
-
-  <div class="exec-band"><span class="num">11</span><h3>Data quality — likely-duplicate registrations</h3><div class="rule"></div></div>
+  <div class="exec-band"><span class="num">9</span><h3>Data quality — likely-duplicate registrations</h3><div class="rule"></div></div>
   <div class="note" id="awareDupNote" style="margin-bottom:14px;"></div>
   <div class="grid" id="awareDupKpi"></div>
   <table id="awareDupTable"></table>
 
-  <div class="note">A few fields still aren't collected in the Growth Workshop's Awareness form and so can't be shown here yet: own-phone / own-business profile split, business ownership by gender, and per-parish recruitment targets. See the <span class="glink" onclick="document.querySelector('[data-group=guide]').click()">Guide</span> tab for the full list.</div>
+  <div class="note">A few fields still aren't collected in the Growth Workshop's Awareness form and so can't be shown here yet: own-phone / own-business profile split, business ownership by gender, and per-parish recruitment targets. See the <span class="glink" onclick="document.querySelector('[data-group=guide]').click()">Guide</span> tab for the full list. Baseline coverage, income, and eligibility/profile comparisons against Awareness have moved to the <span class="glink" onclick="document.querySelector('[data-view=baseline-analytics]').click()">Baseline Analytics</span> tab.</div>
 </div>
 
 <!-- ============ PERSONA KYC ============ -->
@@ -803,14 +767,7 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
   </div>
   <div class="note">Source: Baseline survey's "got permission" / "permission from whom" questions (n=134). The Acquisition tracker's equivalent field (<i>support_needed/parental_engagement</i>) is populated for only 4 of 307 records.</div>
 
-  <div class="exec-band"><span class="num">7</span><h3>Awareness vs. Baseline — eligibility comparison</h3><div class="rule"></div></div>
-  <div class="note">Same 7-criteria rule, checked twice: once at Awareness intake, once again against the fuller Baseline survey. Interest and prior-training aren't re-asked at baseline, so those two show as passing by construction.</div>
-  <div class="grid" id="pkAwareBaselineKpi"></div>
-  <table id="pkAwareBaselineTable"></table>
-
-  <div class="exec-band"><span class="num">8</span><h3>Persona profile — Awareness vs. Baseline</h3><div class="rule"></div></div>
-  <div class="note">Demographic composition at each stage — gender, age, education, income — not eligibility pass/fail. Awareness is self-reported at registration; Baseline is a later interview, so shifts can reflect real change, recall differences, or both. Click a row to drill in.</div>
-  <table id="pkPersonaProfileTable"></table>
+  <div class="note">The Awareness-vs-Baseline eligibility comparison and persona profile comparison have moved to the <span class="glink" onclick="document.querySelector('[data-view=baseline-analytics]').click()">Baseline Analytics</span> tab.</div>
 
 </div>
 
@@ -844,6 +801,73 @@ table.lockout-table th:first-child, table.lockout-table th:nth-child(2){text-ali
     </div>
     <div id="yqVerbatimList"></div>
   </div>
+</div>
+
+<!-- ============ BASELINE ANALYTICS ============ -->
+<!-- Consolidated 2026-08-12 (v31) from the Awareness tab (Bands 9-10 + the baseline-income panel)
+     and Persona KYC (Bands 7-8) into its own home, since Baseline Analytics had grown into its own
+     coherent story across two tabs. Executive Summary's own baseline overview panel is untouched —
+     that one stays a programme-wide summary card, this tab is the full detail. -->
+<div class="view" id="view-baseline-analytics">
+  <div class="view-head">
+    <h2>Baseline Analytics</h2>
+    <p>Everything comparing the Baseline visit against Awareness intake, in one place: how many eligible registrants have actually been baselined so far, their income at that visit, overall baseline coverage across every registrant (not just the eligible subset), and whether the same 7 selection criteria — plus a demographic profile — still hold up on a fuller re-check.</p>
+  </div>
+
+  <div class="exec-band"><span class="num">1</span><h3>Eligible &rarr; Baselined</h3><div class="rule"></div></div>
+  <div class="note" style="margin-bottom:14px;">Every eligible Awareness registrant (<span id="awareBaselineEligTotal"></span>) cross-referenced against completed Baseline surveys, matched by youth ID. This figure matches the Awareness-only eligible count on the Awareness tab.</div>
+  <div class="grid" id="awareBaselineKpi"></div>
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-head"><div><h3>By district</h3><p>Click a row to drill down.</p></div><span class="chip real">REAL</span></div>
+      <table id="awareBaselineDistTable"></table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>By gender</h3></div><span class="chip real">REAL</span></div>
+      <table id="awareBaselineGenderTable"></table>
+    </div>
+  </div>
+
+  <div class="exec-band"><span class="num">2</span><h3>Baseline income vs. net profit</h3><div class="rule"></div></div>
+  <div class="note" id="awareProfitNote" style="margin-bottom:14px;"></div>
+  <div class="grid" id="awareProfitKpi"></div>
+  <div class="panel" style="margin-bottom:16px;">
+    <div class="panel-head"><div><h3>Weekly income vs. eligibility threshold (UGX 35,000/week)</h3><p>Baseline weekly income (2-week income ÷ 2), banded against the same threshold used for eligibility.</p></div><span class="chip real">REAL</span></div>
+    <table id="awareIncomeBandsTable"></table>
+  </div>
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-head"><div><h3>Baseline income vs. net profit, by district</h3></div><span class="chip real">REAL</span></div>
+      <canvas id="awareProfitChart" style="max-height:320px;"></canvas>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Detail, by district</h3></div><span class="chip real">REAL</span></div>
+      <table id="awareProfitTable"></table>
+    </div>
+  </div>
+
+  <div class="exec-band"><span class="num">3</span><h3>Marketing vs. baseline — absolute numbers &amp; eligibility</h3><div class="rule"></div></div>
+  <div class="note" style="margin-bottom:14px;">All Awareness registrants ("marketing") against eligibility and completed baselines — not just the eligible subset baselined above. This helps assess overall baseline coverage, not only among the already-eligible pool. Same underlying figures as the Executive Summary.</div>
+  <div class="grid" id="awareMarketingBaselineKpi"></div>
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-head"><div><h3>By district</h3><p>Parish-level detail is in the table to the right.</p></div><span class="chip real">REAL</span></div>
+      <table id="awareMarketingBaselineTable"></table>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>By parish</h3><p>Top 10 by recruited.</p></div><span class="chip real">REAL</span></div>
+      <table id="awareMarketingBaselineParishTable"></table>
+    </div>
+  </div>
+
+  <div class="exec-band"><span class="num">4</span><h3>Awareness vs. Baseline — eligibility comparison</h3><div class="rule"></div></div>
+  <div class="note" id="pkAwareBaselineNote">Re-verifies age, education, income, and business against the condensed Baseline columns added to the Awareness sheet (baseline_age / baseline_educ / baseline_last2weeks_income / baseline_own_business), for youth who've completed a baseline visit so far. At baseline, "business" means the youth's business is <b>currently operating</b> — a continuity check, not the same ownership question asked at Awareness intake. Interest, consent, and prior-training aren't re-asked at baseline at all. Gender and marital status are demographic context only (see Band 5 below) — they're never part of this eligibility re-check. <b>Both columns below are limited to only those who've been baselined</b> — the "Awareness" column is each baselined youth's own original intake answers, not the full registrant pool, so this is a like-for-like comparison of the same people at two points in time.</div>
+  <div class="grid" id="pkAwareBaselineKpi"></div>
+  <table id="pkAwareBaselineTable"></table>
+
+  <div class="exec-band"><span class="num">5</span><h3>Persona profile — Awareness vs. Baseline</h3><div class="rule"></div></div>
+  <div class="note">Demographic composition at each stage — gender, age, education, income, marital status — not eligibility pass/fail. Awareness is self-reported at registration; Baseline is a later interview, so shifts can reflect real change, recall differences, or both. Baseline gender is still being corrected at the source as of this writing — its numbers here will update automatically once that's fixed, no dashboard change needed. Click a row to drill in.</div>
+  <table id="pkPersonaProfileTable"></table>
 </div>
 
 <!-- ============ MOBILISATION ============ -->
@@ -1175,6 +1199,11 @@ let PERSONA_KYC = {"":{"total":394,"female_total":219,"male_total":175,"criteria
    "EGW014_Musamba_Reagan" — matched on the leading EGW code). Every
    baseline record matched to an eligible youth (no orphans). 11 eligible
    youth (3 baselined, 8 not yet) have no gender on file. */
+// Live-only, no June-pilot snapshot fallback (2026-08-12) — see computeBaselineIncomeAnalysis() in
+// Code.gs and renderProfitAnalysis() below. Stays null until a real payload arrives; renderProfitAnalysis()
+// treats null (or overall.n===0) as "not enough data yet" and falls back to the muted markup, same
+// blank-before-live policy as everywhere else on this dashboard.
+let BASELINE_INCOME_ANALYSIS = null;
 let BASELINE_TRACKING = {
   total_eligible: 360, baselined: 130, not_yet: 230,
   by_gender: { female:{baselined:69,not_yet:121}, male:{baselined:58,not_yet:101}, unknown:{baselined:3,not_yet:8} },
@@ -2007,10 +2036,34 @@ function renderAwareness(){
       `<tr class="kpi-clickable" onclick="awareDrillParish('${d}')"><td><b>${titleCase(d)}</b> ›</td><td>${fmt(v.registered)}</td><td>${fmt(v.eligible)}</td><td>${v.female_pct}%</td></tr>`
     ).join('');
 
-  renderBaselineTracking();
+  renderAwareDataQuality();
 }
 
-function renderBaselineTracking(){
+// Data-quality section only (2026-08-12, v31) — this used to be the tail end of
+// renderBaselineTracking(), which also rendered Eligible→Baselined, the income panel, and
+// marketing-vs-baseline; all three of those moved to renderBaselineAnalytics() on the new
+// Baseline Analytics tab. This is genuinely unrelated to baseline tracking (it's a duplicate-phone
+// check against the raw Awareness rows) so it stays here on the Awareness tab as its own function.
+function renderAwareDataQuality(){
+  // MUTED (2026-08-11): DUPLICATES_ANALYSIS is a June-pilot snapshot (n=607), no live source.
+  document.getElementById('awareDupNote').innerHTML = `<span style="color:var(--muted)">🔒 Not live yet — this panel used a June-pilot snapshot with no live source. Muted rather than shown as real.</span>`;
+  document.getElementById('awareDupKpi').innerHTML = [
+    'Registrations checked', 'Likely-duplicate phone numbers', 'Registrations involved',
+  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
+  document.getElementById('awareDupTable').innerHTML = `<tr><th>District</th><th>Registrations on a duplicated phone number</th></tr>
+    <tr><td colspan="2" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
+}
+
+// Baseline Analytics tab (2026-08-12, v31) — consolidates what used to be spread across the
+// Awareness tab (Eligible→Baselined, baseline income vs. net profit, marketing-vs-baseline) and
+// Persona KYC (the Awareness-vs-Baseline eligibility comparison and persona profile comparison).
+// Executive Summary's own baseline overview panel is untouched by this move — see esMarketingBaselineKpi
+// / renderProfitAnalysis('es') in renderExec(), still rendered from there exactly as before.
+function renderBaselineAnalytics(){
+  const A = DATA.awareness;
+  const P = PERSONA_KYC[rawDistrict(FILTER_DISTRICT)] || PERSONA_KYC[''];
+
+  // ---- 1. Eligible → Baselined ----
   const B = BASELINE_TRACKING;
   // Respect the district filter where we have a per-district breakdown;
   // gender has no filter on this page, so it's always shown combined.
@@ -2040,9 +2093,10 @@ function renderBaselineTracking(){
       return `<tr><td><b>${titleCase(g)}</b></td><td>${fmt(tot)}</td><td>${fmt(v.baselined)}</td><td style="color:${p>=50?'var(--green)':'var(--coral)'};font-weight:700">${p.toFixed(1)}%</td><td>${fmt(v.not_yet)}</td></tr>`;
     }).join('');
 
+  // ---- 2. Baseline income vs. net profit ----
   renderProfitAnalysis('aware');
 
-  // ---- marketing vs. baseline, absolute numbers + eligibility ----
+  // ---- 3. Marketing vs. baseline, absolute numbers + eligibility ----
   // LIVE (2026-08-11): Code.gs's buildAwarenessLive() now tracks baselined status against every
   // Awareness registrant (not just the eligible subset baseline_tracking covers) — see by_district/
   // by_parish's new `baselined` field and the top-level `baselined_all`.
@@ -2072,14 +2126,77 @@ function renderBaselineTracking(){
     (mbParishRows.slice(0,10).map(v=>`<tr><td>${humanizeLoc(v.parish)}</td><td>${titleCase(v.district)}</td><td>${fmt(v.registered)}</td><td>${fmt(v.eligible)}</td><td>${fmt(v.baselined||0)}</td></tr>`).join('')
     || `<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px;">No parish data yet.</td></tr>`);
 
-  // ---- data quality: likely-duplicate registrations ----
-  // MUTED (2026-08-11): DUPLICATES_ANALYSIS is a June-pilot snapshot (n=607), no live source.
-  document.getElementById('awareDupNote').innerHTML = `<span style="color:var(--muted)">🔒 Not live yet — this panel used a June-pilot snapshot with no live source. Muted rather than shown as real.</span>`;
-  document.getElementById('awareDupKpi').innerHTML = [
-    'Registrations checked', 'Likely-duplicate phone numbers', 'Registrations involved',
-  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
-  document.getElementById('awareDupTable').innerHTML = `<tr><th>District</th><th>Registrations on a duplicated phone number</th></tr>
-    <tr><td colspan="2" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
+  // ---- 4. Awareness vs. Baseline — eligibility comparison ----
+  // LIVE (2026-08-12): baseline_age / baseline_educ / baseline_last2weeks_income /
+  // baseline_own_business are a condensed Baseline summary appended at the tail end of the
+  // Awareness sheet itself (NOT a separate Baseline-tab submission) — see
+  // computeAwarenessVsBaselineEligibility() in Code.gs. Age/education/income/business are all
+  // re-verified this way; interest/consent/prior_training aren't re-asked at baseline at all (no
+  // column exists). Business at baseline means "currently operating" — a continuity check, not the
+  // same question as the Awareness-side ownership criterion, but a real pass/fail requirement here
+  // per explicit instruction. Reads ONLY from AB.eligibility — gender and marital status
+  // (AB.profile) are never referenced in this section. n grows over time as more youth complete a
+  // baseline visit, so small/zero counts here mean "not enough data yet".
+  //
+  // LIMITED TO ONLY THOSE BASELINED (2026-08-12, per explicit instruction): the Awareness side of
+  // this whole section — the KPI card and the table's "Awareness pass rate" column — now reads
+  // ABE.awareness_side instead of Persona KYC's P.criteria/P.eligibility_overall. Those cover ALL
+  // registrants (e.g. 545 screened); reading them here compared a different, much larger population
+  // against the small baselined subset, which wasn't a fair before/after read on the same people.
+  // ABE.awareness_side recomputes the same 7-criteria Awareness check restricted to exactly the
+  // baselined cohort (n === AB.n always), so both columns of this section now describe the same
+  // youth at two points in time.
+  const AB = P.awareness_vs_baseline || { n:0, eligibility:{}, profile:{} };
+  const ABE = AB.eligibility || { criteria:{}, not_reverified:[], fully_reverified:0, fully_reverified_pass:0, business_status:{}, business_status_total:0 };
+  const awS = ABE.awareness_side || { criteria:{}, eligible:0, n:0 };
+  const abHasData = ABE.fully_reverified > 0;
+  const awEligTotal = awS.eligible, awTotalN = awS.n;
+  document.getElementById('pkAwareBaselineKpi').innerHTML = [
+    { label:'Eligible at Awareness', value: awTotalN ? fmt(awEligTotal) : '—',
+      sub: awTotalN ? `${pctTxt(awEligTotal, awTotalN)} of ${fmt(awTotalN)} baselined so far (at their own intake)` : `${fmt(AB.n)} baselined so far` },
+    { label:'Eligible at Baseline', value: abHasData ? fmt(ABE.fully_reverified_pass) : '—',
+      sub: abHasData ? `${pctTxt(ABE.fully_reverified_pass, ABE.fully_reverified)} of ${fmt(ABE.fully_reverified)} re-checked so far` : `${fmt(AB.n)} baselined so far, none with complete age+education+income+business yet` },
+    { label:'Gap (Awareness → Baseline)', value: (abHasData && awTotalN) ? (pct(awEligTotal,awTotalN) - pct(ABE.fully_reverified_pass, ABE.fully_reverified)).toFixed(1)+' pp' : '—',
+      sub: (abHasData && awTotalN) ? 'Same cohort, both columns — Awareness rate minus Baseline rate — positive means eligibility drops on closer re-check, negative means it rises' : 'Not enough baseline data yet' },
+  ].map(c=>`<div class="card"><span class="tag">REAL</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
+
+  document.getElementById('pkAwareBaselineTable').innerHTML = `<tr><th>Criterion</th><th>Awareness pass rate (baselined cohort)</th><th>Baseline pass rate</th></tr>` +
+    KYC_CRIT_ORDER.map(k=>{
+      const aw = awS.criteria[k]; const awPass = aw ? aw.pass : 0, awTotal = aw ? aw.total : 0;
+      let baseCell;
+      if (k==='age' || k==='education' || k==='income' || k==='business') {
+        const bc = ABE.criteria[k];
+        const note = k==='business' ? ' <span style="color:var(--muted)">— currently operating</span>' : '';
+        baseCell = (bc && bc.total) ? `${pctTxt(bc.pass, bc.total)}${note} <span style="color:var(--muted)">(n=${fmt(bc.total)})</span>` : `<span style="color:var(--muted)">No baseline data yet</span>`;
+      } else {
+        baseCell = `<span style="color:var(--muted)">Not re-asked at baseline</span>`;
+      }
+      return `<tr><td><b>${KYC_CRIT_LABELS[k]}</b></td><td>${awTotal ? pctTxt(awPass,awTotal) : '<span style="color:var(--muted)">—</span>'} <span style="color:var(--muted)">(n=${fmt(awTotal)})</span></td><td>${baseCell}</td></tr>`;
+    }).join('');
+  if (awTotalN) {
+    document.getElementById('pkAwareBaselineTable').innerHTML += `<tr><td colspan="3" style="color:var(--muted);font-size:12.5px;padding-top:8px;">Awareness-side denominators above are all n=${fmt(awTotalN)} — every baselined youth already has complete Awareness intake data, since only eligible, fully-screened youth get scheduled for a baseline visit. Any gaps you see are on the Baseline side only, where the re-check survey itself isn't 100% complete yet for every field (see the Baseline column's own n= counts below, and the note under the table).</td></tr>`;
+  }
+  if (ABE.business_status_total) {
+    document.getElementById('pkAwareBaselineTable').innerHTML += `<tr><td colspan="3" style="color:var(--muted);font-size:12.5px;padding-top:8px;">Baseline business status breakdown (n=${fmt(ABE.business_status_total)}): ${pctTxt(ABE.business_status.currently_operating||0, ABE.business_status_total)} currently operating, ${pctTxt(ABE.business_status.temporarily_paused||0, ABE.business_status_total)} temporarily paused.</td></tr>`;
+  }
+
+  // ---- 5. Persona profile — Awareness vs. Baseline (demographic composition) ----
+  // LIVE (2026-08-12) — the "Baseline" column reads P.awareness_vs_baseline (see Code.gs), computed
+  // only over youth with a recorded baseline visit so far (a much smaller, growing n than the
+  // Awareness column). Collapsed to one summary row per group — the full per-category detail lives
+  // behind a click, via pkDrillProfile() / the shared drill panel. pkProfileGroups() is the single
+  // source of truth for the group shape, reused by both the summary table here and the drill-down.
+  const profileGroups = pkProfileGroups(P);
+  document.getElementById('pkPersonaProfileTable').innerHTML =
+    `<tr><th>Group</th><th>Most common (Awareness, n=${fmt(P.total)})</th><th>Share</th><th>Baseline</th></tr>` +
+    profileGroups.map(g=>{
+      const top = g.rows.reduce((best,r)=> r[1]>best[1]?r:best, g.rows[0]);
+      const bTotal = g.baseline.n;
+      const baseCell = bTotal > 0
+        ? (()=>{ const bTop = g.baseline.rows.reduce((best,r)=> r[1]>best[1]?r:best, g.baseline.rows[0]); return `${bTop[0]} — ${pctTxt(bTop[1], bTotal)} <span style="color:var(--muted)">(n=${fmt(bTotal)})</span>`; })()
+        : `<span style="color:var(--muted)">No baseline data yet</span>`;
+      return `<tr class="kpi-clickable" onclick="pkDrillProfile('${g.key}')"><td><b>${g.title}</b> ›</td><td>${top[0]}</td><td>${pctTxt(top[1],P.total)}</td><td>${baseCell}</td></tr>`;
+    }).join('');
 }
 
 /* ================= YOUTH QUESTIONS ================= */
@@ -2399,13 +2516,14 @@ function renderEndline(){
 function renderGuide(){
   const rows = [
     ['Executive Summary','Whole funnel at a glance: conversion cards, conversion rates &amp; funnel counts by district, progress-on-target (bars + table), full funnel, attrition table, eligibility barriers, gender-disaggregation chart + table (Registered → Acquired, vs the 60% female target), mindset-shift teaser, and a marketing-vs-baseline overview (recruitment vs. baseline coverage by district, plus baseline income vs. net profit against the UGX 35,000/week eligibility threshold).'],
-    ['Recruitment › Awareness','Registration funnel (Registered → Interested → Eligible) with progress vs. the programme-wide target, gender by funnel stage, a KYC screening bottleneck table (which criterion blocks the most youth, computed from the 7-criteria Persona KYC breakdown), a thematic breakdown of anticipated barriers to participation (with drill-down by district and gender), demographic-eligibility trend (daily + cumulative), drivers for registration, location table (with targets) and full parish detail table, education/channel breakdowns, baseline income vs. net profit, a marketing-vs-baseline absolute-numbers &amp; eligibility comparison, and a data-quality check for likely-duplicate registrations (matching phone numbers).'],
-    ['Recruitment › Persona KYC','Pass rate by criterion, the full lockout breakdown by gender, root-cause analysis (which single criterion blocks the most youth), distribution against each threshold for eligible youth only (age simplified to &lt;18 / 18&ndash;30 / &gt;30), additional persona context (marital status, phone ownership), a decision-makers section showing who grants permission to participate (from the Baseline survey, with drill by district) — informs parent/family engagement strategy — and an Awareness-vs-Baseline eligibility comparison, re-checking the same 7 criteria against the fuller baseline interview.'],
+    ['Recruitment › Awareness','Registration funnel (Registered → Interested → Eligible) with progress vs. the programme-wide target, gender by funnel stage, a KYC screening bottleneck table (which criterion blocks the most youth, computed from the 7-criteria Persona KYC breakdown), a thematic breakdown of anticipated barriers to participation (with drill-down by district and gender), demographic-eligibility trend (daily + cumulative), drivers for registration, location table (with targets) and full parish detail table, education/channel breakdowns, and a data-quality check for likely-duplicate registrations (matching phone numbers). Baseline coverage, income, and comparisons against Awareness moved to the Baseline Analytics tab (see below).'],
+    ['Recruitment › Persona KYC','Pass rate by criterion, the full lockout breakdown by gender, root-cause analysis (which single criterion blocks the most youth), distribution against each threshold for eligible youth only (age simplified to &lt;18 / 18&ndash;30 / &gt;30), additional persona context (marital status, phone ownership), and a decision-makers section showing who grants permission to participate (from the Baseline survey, with drill by district) — informs parent/family engagement strategy. The Awareness-vs-Baseline eligibility comparison moved to the Baseline Analytics tab (see below).'],
+    ['Recruitment › Baseline Analytics','Consolidated 2026-08-12 (v31) from the Awareness and Persona KYC tabs, since it had grown into its own coherent story: Eligible→Baselined coverage by district and gender, baseline income vs. net profit by district (both live — income from baseline_last2weeks_income, net profit from biz_profit_calc, added 2026-08-12; net profit can be negative and is shown as-is), a weekly income distribution against the UGX 35,000/week eligibility threshold (below it / 35k-49,999 / 50k+, added 2026-08-12), a marketing-vs-baseline absolute-numbers &amp; eligibility view across every registrant (not just the eligible subset), an Awareness-vs-Baseline eligibility re-check limited to only baselined youth on both sides (age/education/income/business against the condensed Baseline columns — interest/consent/prior-training aren\'t re-asked at baseline), and a persona profile comparison (gender/age/education/income/marital status, click to drill). Executive Summary keeps its own programme-wide baseline overview card unchanged — this tab is the full detail.'],
     ['Recruitment › Mobilisation','Confirmation-call funnel (assigned → reached → confirmed), call status/outcome charts + tables, mobilisation KPIs by district, gender split (chart + mobiliser % female table), mobiliser leaderboard, attendance-support-needed table, decline reasons. This is the calling stage — tracked in the source file as "Acquisition data" but renamed here since it is really Mobilisation.'],
     ['Recruitment › Acquisition','Verification at the venue (what Educate! calls "Acquired") — totals table, by-district table + chart, by-venue detail table, gender split (verified vs enrolled, against the 60% target), plus the baseline profile of acquired youth. Sourced from the "Youth arrival" tracker.'],
     ['Implementation › Attendance','Attendance by district table, attendance by venue (chart + table), daily attendance rate chart, and a daily present/net-churn table.'],
     ['Implementation › Trainer Quality','Lesson-observation domain chart + domain summary table, avg score by site table, trainer leaderboard with Exceeds/Meets/Below rating (click to drill by site or trainer).'],
-    ['Enumerator Worklist','Every eligible &amp; interested youth (360), by district/parish, with a baseline-status filter and search — sorted priority-first (S1–S5 candidates ahead of P7 back-ups, per EGW baseline-scheduling guidance). Click a row to drill into full contact and location detail. Also includes baseline coverage &amp; income analytics: recruitment-vs-baseline by district/parish (using the full recruited population, not just this eligible worklist), average income at baseline (overall and eligible-linked), baseline entries per enumerator, and baseline income vs. net profit by district. This tab has its own password since it carries names and phone numbers — see the security note in the file\'s source for why the client-side gate is UX-only, not real access control.'],
+    ['Enumerator Worklist','Every eligible &amp; interested youth (360), by district/parish, with a baseline-status filter and search — sorted priority-first (S1–S5 candidates ahead of P7 back-ups, per EGW baseline-scheduling guidance). Click a row to drill into full contact and location detail. This tab has its own password since it carries names and phone numbers — see the security note in the file\'s source for why the client-side gate is UX-only, not real access control.'],
   ];
   document.getElementById('guideBody').innerHTML = `
     <div class="panel"><h3 style="margin-bottom:10px;">Views not built yet, and why</h3>
@@ -2715,37 +2833,8 @@ function renderPersonaKYC(){
     document.getElementById('pkPermissionDistTable').innerHTML = `<tr><th>District</th><th>Supportive</th><th>Need convincing</th><th>Not sure</th><th>Can't allow</th><th>% Supportive</th></tr>
       <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:14px;">Awaiting live data — redeploy the updated Code.gs to enable.</td></tr>`;
   }
-
-  // 7. Awareness vs. Baseline — eligibility comparison. MUTED (2026-08-11): the "Baseline" side
-  // (BASELINE_ELIGIBILITY) is a June-pilot snapshot (n=134), not wired to the live RCT sheet — its
-  // numbers are blanked below. The "Awareness" side (from PERSONA_KYC) stays, since that IS live.
-  const awEligTotal = P.eligibility_overall.female.pass + P.eligibility_overall.male.pass;
-  document.getElementById('pkAwareBaselineKpi').innerHTML = [
-    { label:'Eligible at Awareness', value: fmt(awEligTotal), sub: pctTxt(awEligTotal, P.total)+` of ${fmt(P.total)} screened`, live:true },
-    { label:'Eligible at Baseline', value:'—', sub:'Not live yet', live:false },
-    { label:'Gap', value:'—', sub:'Not live yet', live:false },
-  ].map(c=>`<div class="card"><span class="tag" ${c.live?'':'style="background:#EFEAE0;color:var(--muted);"'}>${c.live?'REAL':'NOT LIVE'}</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
-
-  document.getElementById('pkAwareBaselineTable').innerHTML = `<tr><th>Criterion</th><th>Awareness pass rate</th><th>Baseline pass rate</th></tr>` +
-    KYC_CRIT_ORDER.map(k=>{
-      const aw = P.criteria[k]; const awPass = aw.female.pass+aw.male.pass, awTotal = aw.female.total+aw.male.total;
-      return `<tr><td><b>${KYC_CRIT_LABELS[k]}</b></td><td>${pctTxt(awPass,awTotal)}</td><td style="color:var(--muted)">— not live</td></tr>`;
-    }).join('');
-
-  // 8. Persona profile — Awareness vs. Baseline (demographic composition). MUTED (2026-08-11): the
-  // "Baseline" column (BASELINE_PROFILE) is a June-pilot snapshot (n=134), not wired to the live RCT
-  // sheet — blanked below. The "Awareness" column (from PERSONA_KYC) stays, since that IS live.
-  // Collapsed to one summary row per group (2026-08-11, per request to keep Persona KYC tables
-  // light) — the full per-category detail that used to be shown inline now lives behind a click,
-  // via pkDrillProfile() / the shared drill panel. pkProfileGroups() is the single source of truth
-  // for the group shape, reused by both the summary table here and the drill-down.
-  const profileGroups = pkProfileGroups(P);
-  document.getElementById('pkPersonaProfileTable').innerHTML =
-    `<tr><th>Group</th><th>Most common (Awareness, n=${fmt(P.total)})</th><th>Share</th><th>Baseline</th></tr>` +
-    profileGroups.map(g=>{
-      const top = g.rows.reduce((best,r)=> r[1]>best[1]?r:best, g.rows[0]);
-      return `<tr class="kpi-clickable" onclick="pkDrillProfile('${g.key}')"><td><b>${g.title}</b> ›</td><td>${top[0]}</td><td>${pctTxt(top[1],P.total)}</td><td style="color:var(--muted)">— not live</td></tr>`;
-    }).join('');
+  // Bands 7-8 (Awareness vs. Baseline eligibility comparison, persona profile comparison) moved to
+  // renderBaselineAnalytics() on the new Baseline Analytics tab (2026-08-12, v31) — see there.
 }
 
 // Shared section builders for the Persona KYC drill-downs (2026-08-11) — used by both
@@ -2784,6 +2873,10 @@ function pkDrillLockout(key){
 }
 
 function pkProfileGroups(P){
+  // Reads ONLY P.awareness_vs_baseline.profile — the standalone demographic comparison. Never
+  // touches .eligibility, so gender/marital status here can't leak into (or be confused with) any
+  // eligibility pass/fail figure shown elsewhere on this tab.
+  const ABP = (P.awareness_vs_baseline && P.awareness_vs_baseline.profile) || {};
   const awAgeSum = (band) => (P.buckets.age.female[band]||0) + (P.buckets.age.male[band]||0);
   const awIncSum = (band) => (P.buckets.income.female[band]||0) + (P.buckets.income.male[band]||0);
   const eduGroup = (eduBuckets, keys) => keys.reduce((s,k)=> s + (eduBuckets.female[k]||0) + (eduBuckets.male[k]||0), 0);
@@ -2796,21 +2889,54 @@ function pkProfileGroups(P){
   const awMarriedTotal = P.context.marital.female.married + P.context.marital.male.married;
   const awSingleTotal = P.context.marital.female.single + P.context.marital.male.single;
   const awOtherMarital = Math.max(0, P.total - awMarriedTotal - awSingleTotal);
+
+  // Baseline side — LIVE (2026-08-12), computed only over youth with a recorded baseline visit so
+  // far (AB.n, a much smaller and still-growing number vs. the Awareness columns). Age uses the
+  // same collapsed 3-band split as Awareness for a direct comparison. Education deliberately does
+  // NOT force-fit baseline's coarser 3-band scale into Awareness's 4-band one — see
+  // baselineEducBand()'s comment in Code.gs — shown as its own bands with a note instead. Gender is
+  // wired live even though baseline_gender is currently sparse/being corrected at the source; this
+  // will fill in on its own once that's fixed.
+  const AGE_BAND_MAP = { '<18':'<18', '18-20':'18-30', '21-23':'18-30', '24-26':'18-30', '27-30':'18-30', '>30':'>30' };
+  const abAgeCounts = (ABP.age_bands && ABP.age_bands.counts) || {};
+  const abAgeSum = (band) => Object.keys(abAgeCounts).reduce((s,k)=> s + (AGE_BAND_MAP[k]===band ? abAgeCounts[k] : 0), 0);
+  const abIncCounts = (ABP.income_bands && ABP.income_bands.counts) || {};
+  const abEduCounts = (ABP.education_bands && ABP.education_bands.counts) || {};
+  const abGender = ABP.gender || { female:0, male:0, total:0 };
+  const abMarital = ABP.marital || { single:0, married:0, other:0 };
+
   return [
-    { key:'gender', title:'Gender', rows:[['Female', P.female_total],['Male', P.male_total]] },
-    { key:'age', title:'Age', rows:[['Under 18', awAgeSum('<18')],['18–30', awAgeSum('18-30')],['Over 30', awAgeSum('>30')]] },
-    { key:'education', title:'Education', rows:[['P7 or below', awEdu['P7 or below']],['S1–S4', awEdu['S1-S4']],['S5–S6', awEdu['S5-S6']],['Diploma+', awEdu['Diploma+']]] },
-    { key:'income', title:'Weekly income (self-reported)', rows:[['< UGX 35,000', awIncSum('<35k')],['UGX 35,000–50,000', awIncSum('35k-50k')],['UGX 50,000–100,000', awIncSum('50k-100k')],['UGX 100,000+', awIncSum('100k+')]] },
-    { key:'marital', title:'Marital status', rows:[['Single', awSingleTotal],['Married', awMarriedTotal],['Other / not stated', awOtherMarital]] },
+    { key:'gender', title:'Gender',
+      rows:[['Female', P.female_total],['Male', P.male_total]],
+      baseline:{ n: abGender.total, rows:[['Female', abGender.female],['Male', abGender.male]] } },
+    { key:'age', title:'Age',
+      rows:[['Under 18', awAgeSum('<18')],['18–30', awAgeSum('18-30')],['Over 30', awAgeSum('>30')]],
+      baseline:{ n: (ABP.age_bands && ABP.age_bands.total) || 0, rows:[['Under 18', abAgeSum('<18')],['18–30', abAgeSum('18-30')],['Over 30', abAgeSum('>30')]] } },
+    { key:'education', title:'Education',
+      rows:[['P7 or below', awEdu['P7 or below']],['S1–S4', awEdu['S1-S4']],['S5–S6', awEdu['S5-S6']],['Diploma+', awEdu['Diploma+']]],
+      baseline:{ n: (ABP.education_bands && ABP.education_bands.total) || 0, rows: ((ABP.education_bands && ABP.education_bands.order) || []).map(k=>[k, abEduCounts[k]||0]), note:"Baseline uses its own, coarser 3-band education scale — not a like-for-like match to the Awareness columns." } },
+    { key:'income', title:'Weekly income (self-reported)',
+      rows:[['< UGX 35,000', awIncSum('<35k')],['UGX 35,000–50,000', awIncSum('35k-50k')],['UGX 50,000–100,000', awIncSum('50k-100k')],['UGX 100,000+', awIncSum('100k+')]],
+      baseline:{ n: (ABP.income_bands && ABP.income_bands.total) || 0, rows:[['< UGX 35,000', abIncCounts['<35k']||0],['UGX 35,000–50,000', abIncCounts['35k-50k']||0],['UGX 50,000–100,000', abIncCounts['50k-100k']||0],['UGX 100,000+', abIncCounts['100k+']||0]] } },
+    { key:'marital', title:'Marital status',
+      rows:[['Single', awSingleTotal],['Married', awMarriedTotal],['Other / not stated', awOtherMarital]],
+      baseline:{ n: ABP.marital_total || 0, rows:[['Single', abMarital.single],['Married', abMarital.married],['Other / not stated', abMarital.other]] } },
   ];
 }
 function pkDrillProfile(key){
   const P = PERSONA_KYC[rawDistrict(FILTER_DISTRICT)] || PERSONA_KYC[''];
   const g = pkProfileGroups(P).find(x=>x.key===key);
   if(!g) return;
-  esOpen(g.title+' — full breakdown (n='+fmt(P.total)+')', 'PROFILE');
-  const rows = g.rows.map(([label,n])=>`<div class="drill-row"><span><b>${label}</b></span><span>${fmt(n)} (${pctTxt(n,P.total)})</span></div>`).join('');
-  document.getElementById('drillBody').innerHTML = `<div class="dpanel"><h4>${g.title}</h4>${rows}<p class="drill-note" style="margin-top:10px;">Baseline-side comparison isn't live yet — see the note on this tab.</p></div>`;
+  esOpen(g.title+' — Awareness vs. Baseline', 'PROFILE');
+  const awRows = g.rows.map(([label,n])=>`<div class="drill-row"><span><b>${label}</b></span><span>${fmt(n)} (${pctTxt(n,P.total)})</span></div>`).join('');
+  let baseSection;
+  if (g.baseline && g.baseline.n > 0) {
+    const baseRows = g.baseline.rows.map(([label,n])=>`<div class="drill-row"><span><b>${label}</b></span><span>${fmt(n)} (${pctTxt(n,g.baseline.n)})</span></div>`).join('');
+    baseSection = `<div class="dpanel"><h4>Baseline (n=${fmt(g.baseline.n)})</h4>${baseRows}${g.baseline.note?`<p class="drill-note" style="margin-top:8px;">${g.baseline.note}</p>`:''}</div>`;
+  } else {
+    baseSection = `<div class="dpanel"><h4>Baseline</h4><p class="drill-note">No baseline data recorded for this group yet.</p></div>`;
+  }
+  document.getElementById('drillBody').innerHTML = `<div class="dpanel"><h4>Awareness (n=${fmt(P.total)})</h4>${awRows}</div>${baseSection}`;
 }
 
 function pkDrillPermissionDistrict(d){
@@ -2961,23 +3087,110 @@ function renderEnumerator(){
 }
 
 // Shared income-vs-net-profit renderer, reused on the Executive Summary and the Awareness tab's
-// baseline tracking band (no longer on Enumerator Worklist — see renderEnumerator()). MUTED
-// (2026-08-11): NET_PROFIT_ANALYSIS is a June-pilot Baseline snapshot (n=134) with no live source —
-// Code.gs doesn't compute this from the live Baseline tab. Per the no-demo-data policy, blank rather
-// than show pilot numbers under a "REAL" tag.
+// baseline tracking band. LIVE (2026-08-12) for the INCOME half only: BASELINE_INCOME_ANALYSIS reads
+// P.baseline_income_analysis (Code.gs — computeBaselineIncomeAnalysis()), derived from
+// baseline_last2weeks_income on the condensed Baseline columns appended to the Awareness sheet
+// (halved to a weekly figure, same convention as the Awareness-side income criterion). "Net profit"
+// stays NOT LIVE on purpose — none of the 7 condensed baseline columns capture profit at all; the old
+// June-pilot NET_PROFIT_ANALYSIS snapshot sourced profit from a separate 3-day-profit tracker that
+// isn't part of this data source. Per the no-demo-data policy, the profit cells stay muted rather than
+// showing pilot numbers under a "REAL" tag — only add a live profit figure here if a real baseline
+// profit column ever exists to read.
+// Net profit went live 2026-08-12 (same day as the Awareness-vs-Baseline fix above): the Baseline
+// sheet now carries biz_profit_calc (= biz_sales_7d − biz_exp_7d over the last 7 days — see
+// computeBaselineIncomeAnalysis() in Code.gs for why this one, not the self-reported biz_profit_7d).
+// It's already a weekly (7-day) figure, unlike baseline_last2weeks_income, and it can legitimately be
+// negative (expenses exceeded sales that week) — shown as-is, not floored to zero, colored coral when
+// negative so it reads clearly rather than looking like a formatting glitch.
+function fmtSignedUgx(n){
+  if(n===null||n===undefined) return '—';
+  const v = Math.round(n);
+  return (v<0 ? '-UGX ' : 'UGX ') + Math.abs(v).toLocaleString();
+}
+function profitValColor(n){ return (n!==null && n!==undefined && n<0) ? coral : 'inherit'; }
+
 function renderProfitAnalysis(prefix){
+  const BIA = BASELINE_INCOME_ANALYSIS;
+  const hasIncomeData = !!(BIA && BIA.overall && BIA.overall.n > 0);
+  const PO = BIA && BIA.profit_overall;
+  const hasProfitData = !!(PO && PO.n > 0);
+  const hasData = hasIncomeData || hasProfitData;
+  const chartId = prefix+'ProfitChart';
+
   const noteEl = document.getElementById(prefix+'ProfitNote');
-  if(noteEl) noteEl.innerHTML = `<span style="color:var(--muted)">🔒 Not live yet — this panel used a June-pilot Baseline snapshot (n=134) with no live source. Muted rather than shown as real.</span>`;
+  if(noteEl) noteEl.innerHTML = hasData
+    ? `<span style="color:var(--muted)">Income at baseline is live below, from <b>baseline_last2weeks_income</b> (halved to a weekly figure). <b>Net profit</b> is live too, from <b>biz_profit_calc</b> (sales minus expenses over the last 7 days) — it can be negative where a youth's expenses exceeded sales that week; shown as-is, not floored to zero. Income and profit are answered on different sub-sections of the Baseline survey, so their sample sizes (n) can differ.</span>`
+    : `<span style="color:var(--muted)">🔒 Not enough baseline income/profit data yet — no baselined youth have a recorded <b>baseline_last2weeks_income</b> or <b>biz_profit_calc</b> so far.</span>`;
 
   const kpiEl = document.getElementById(prefix+'ProfitKpi');
-  if(kpiEl) kpiEl.innerHTML = [
-    'Avg. weekly income at baseline', 'Avg. weekly-equiv. net profit', 'Median income vs. eligibility threshold',
-  ].map(label=>`<div class="card"><span class="tag" style="background:#EFEAE0;color:var(--muted);">NOT LIVE</span><div class="label">${label}</div><div class="value">—</div></div>`).join('');
+  if(kpiEl){
+    const o = hasIncomeData ? BIA.overall : null;
+    const target = (BIA && BIA.income_target_weekly) || 35000;
+    const cards = [
+      { label:'Avg. weekly income at baseline', live:hasIncomeData,
+        value: hasIncomeData ? 'UGX '+fmt(o.income_weekly_mean) : '—',
+        sub: hasIncomeData ? `n=${fmt(o.n)} baselined with income recorded` : 'Not live yet' },
+      { label:'Avg. weekly net profit', live:hasProfitData,
+        value: hasProfitData ? `<span style="color:${profitValColor(PO.profit_weekly_mean)}">${fmtSignedUgx(PO.profit_weekly_mean)}</span>` : '—',
+        sub: hasProfitData ? `n=${fmt(PO.n)} baselined with profit recorded` : 'Not live yet' },
+      { label:'Median income vs. eligibility threshold', live:hasIncomeData,
+        value: hasIncomeData ? 'UGX '+fmt(o.income_weekly_median) : '—',
+        sub: hasIncomeData ? `vs UGX ${fmt(target)}/week threshold` : 'Not live yet' },
+    ];
+    kpiEl.innerHTML = cards.map(c=>`<div class="card"><span class="tag" ${c.live?'':'style="background:#EFEAE0;color:var(--muted);"'}>${c.live?'REAL':'NOT LIVE'}</span><div class="label">${c.label}</div><div class="value">${c.value}</div><div class="sub">${c.sub}</div></div>`).join('');
+  }
+
+  // Weekly income bands vs. eligibility threshold (added 2026-08-12, per explicit instruction):
+  // baseline_last2weeks_income is a 2-week figure — Code.gs already halves it to weekly before
+  // banding (see BASELINE_INCOME_BAND_ORDER/baselineIncomeBand() there). Boundaries mirror the
+  // UGX 35,000/week eligibility threshold: below it, 35k-49,999, and 50k or more.
+  const bandsEl = document.getElementById(prefix+'IncomeBandsTable');
+  if(bandsEl){
+    const IB = BIA && BIA.income_bands;
+    if(IB && IB.total > 0){
+      bandsEl.innerHTML = `<tr><th>Weekly income band</th><th>n</th><th>% of baselined (with income recorded)</th></tr>` +
+        IB.order.map(k=>{
+          const c = IB.counts[k]||0;
+          return `<tr><td><b>${IB.labels[k]}</b></td><td>${fmt(c)}</td><td>${pctTxt(c, IB.total)}</td></tr>`;
+        }).join('') +
+        `<tr><td style="color:var(--muted)">Total</td><td style="color:var(--muted)">${fmt(IB.total)}</td><td style="color:var(--muted)">100.0%</td></tr>`;
+    } else {
+      bandsEl.innerHTML = `<tr><th>Weekly income band</th><th>n</th><th>% of baselined (with income recorded)</th></tr>
+    <tr><td colspan="3" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
+    }
+  }
 
   const tableEl = document.getElementById(prefix+'ProfitTable');
-  if(tableEl) tableEl.innerHTML = `<tr><th>District</th><th>n</th><th>Avg. weekly income</th><th>Median weekly income</th><th>Avg. weekly-equiv. profit</th><th>Median weekly-equiv. profit</th></tr>
-    <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
-  // chartId canvas intentionally left un-rendered — no live source to chart.
+  if(tableEl){
+    if(hasData){
+      const districts = Object.keys(BIA.by_district).sort((a,b)=>((BIA.by_district[b].n||0)+(BIA.by_district[b].profit_n||0))-((BIA.by_district[a].n||0)+(BIA.by_district[a].profit_n||0)));
+      tableEl.innerHTML = `<tr><th>District</th><th>n (income)</th><th>Avg. weekly income</th><th>Median weekly income</th><th>n (profit)</th><th>Avg. weekly net profit</th><th>Median weekly net profit</th></tr>` +
+        districts.map(d=>{
+          const r = BIA.by_district[d];
+          const incCells = r.n ? `<td>${fmt(r.n)}</td><td>UGX ${fmt(r.income_weekly_mean)}</td><td>UGX ${fmt(r.income_weekly_median)}</td>`
+            : `<td style="color:var(--muted)">0</td><td style="color:var(--muted)">No income data</td><td style="color:var(--muted)">No income data</td>`;
+          const profN = r.profit_n||0;
+          const profCells = profN ? `<td>${fmt(profN)}</td><td style="color:${profitValColor(r.profit_weekly_mean)}">${fmtSignedUgx(r.profit_weekly_mean)}</td><td style="color:${profitValColor(r.profit_weekly_median)}">${fmtSignedUgx(r.profit_weekly_median)}</td>`
+            : `<td style="color:var(--muted)">0</td><td style="color:var(--muted)">No profit data</td><td style="color:var(--muted)">No profit data</td>`;
+          return `<tr><td><b>${titleCase(d)}</b></td>${incCells}${profCells}</tr>`;
+        }).join('');
+    } else {
+      tableEl.innerHTML = `<tr><th>District</th><th>n (income)</th><th>Avg. weekly income</th><th>Median weekly income</th><th>n (profit)</th><th>Avg. weekly net profit</th><th>Median weekly net profit</th></tr>
+    <tr><td colspan="7" style="color:var(--muted);text-align:center;padding:14px;">Not live yet.</td></tr>`;
+    }
+  }
+
+  if(hasData){
+    const districts = Object.keys(BIA.by_district).sort((a,b)=>((BIA.by_district[b].n||0)+(BIA.by_district[b].profit_n||0))-((BIA.by_district[a].n||0)+(BIA.by_district[a].profit_n||0)));
+    const datasets = [];
+    if(hasIncomeData) datasets.push({ label:'Avg. weekly income (UGX)', data:districts.map(d=>BIA.by_district[d].income_weekly_mean!=null?Math.round(BIA.by_district[d].income_weekly_mean):null), backgroundColor:teal });
+    if(hasProfitData) datasets.push({ label:'Avg. weekly net profit (UGX)', data:districts.map(d=>BIA.by_district[d].profit_weekly_mean!=null?Math.round(BIA.by_district[d].profit_weekly_mean):null), backgroundColor:coral });
+    mk(chartId, { type:'bar', data:{ labels:districts.map(titleCase), datasets },
+      options:{ plugins:{ legend:{ display: datasets.length>1 } }, scales:{ y:{ beginAtZero:true } } } });
+  } else if(chartInstances[chartId]){
+    chartInstances[chartId].destroy();
+    delete chartInstances[chartId];
+  }
 }
 
 function enumDrillRecruitParish(district){
@@ -3039,6 +3252,7 @@ window.STAGE_RENDER = {
   'aware': renderAwareness,
   'persona-kyc': renderPersonaKYC,
   'youth-questions': renderYouthQuestions,
+  'baseline-analytics': renderBaselineAnalytics,
   'mob': renderMobilisation,
   'acq': renderAcquisition,
   'impl-attendance': renderAttendance,
@@ -3170,7 +3384,7 @@ const ENUMERATOR_PASSWORD = 'Enumerator2026';
    tripped, or a sheet was renamed/moved), NONE of the live sections are
    applied — the dashboard keeps the embedded snapshot everywhere and the
    badge shows the error, rather than partially overwriting good data. */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5CXOPsDgVDZ-rWdlWFOxD2QmAZ_f0Zcq42mG5t3265O7QfeUnENux6XcUdrbszV6E/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEC1y94i7QE8Yv6pdRlo6yJDa-O9rAaUxBxxGUHzLAsBpuL9Zy3hOgwgeMp6g51tLP/exec';
 let LIVE_DATA_STATUS = 'offline'; // 'offline' | 'live' | 'error'
 let LIVE_DATA_TIMESTAMP = null;
 let LIVE_DATA_ERROR = null;
@@ -3188,6 +3402,7 @@ function egwApplyLivePayload(json){
   if(json.mobiliser_tracker) MOBILISER_TRACKER = json.mobiliser_tracker;
   if(json.commitment_screening) COMMITMENT_SCREENING = json.commitment_screening;
   if(json.youth_questions) YOUTH_QUESTIONS = json.youth_questions;
+  if(json.baseline_income_analysis) BASELINE_INCOME_ANALYSIS = json.baseline_income_analysis;
   LIVE_DATA_STATUS = 'live';
   LIVE_DATA_TIMESTAMP = json.generated_at || null;
   LIVE_DATA_ERROR = null;
@@ -3404,6 +3619,7 @@ function egwBlankLiveDomain(){
   MOBILISER_TRACKER = { cumulative: [], daily: [], overall: { total_days_active_sum: 0, target: 0, eligible: 0 } };
   COMMITMENT_SCREENING = {};
   YOUTH_QUESTIONS = { total_registrants: 0, total_asked: 0, theme_labels: {}, by_theme: {}, verbatims: [] };
+  BASELINE_INCOME_ANALYSIS = null;
 }
 egwBlankLiveDomain();
 
